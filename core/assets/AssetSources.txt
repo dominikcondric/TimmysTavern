@@ -1,0 +1,6 @@
+I made this list to avoid redistribution of other creators assets on GitHub, so before starting a game download all of the following assets in this directory and unpack them.
+
+Asset list:
+1. https://arktentrion.itch.io/pixel-rpg-asset-pack
+2. https://szadiart.itch.io/craftland-demo
+3. https://muhammadriza.itch.io/free-fantasy-rpg-music-pack
