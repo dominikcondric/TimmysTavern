@@ -45,7 +45,7 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 		cam = new OrthographicCamera();
 		cam.setToOrtho(false, 30.f * aspectRatio, 30.f);
 		cam.update();
-		ui = new Stage(new FitViewport(cam.viewportWidth, cam.viewportHeight), batch);
+		ui = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), batch);
 		Gdx.input.setInputProcessor(ui);
 		b2DRenderer = new Box2DDebugRenderer();
 		mapRenderer = new OrthogonalTiledMapRenderer(null, 1f / 32f, batch);

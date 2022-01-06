@@ -8,14 +8,18 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.signals.Listener;
+import com.badlogic.ashley.signals.Signal;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -30,6 +34,8 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -40,6 +46,7 @@ import com.gdx.game.Item;
 import components.AnimationComponent;
 import components.EntityBits;
 import components.GuiComponent;
+import components.ItemComponent;
 import components.MapComponent;
 import components.MusicComponent;
 import components.PhysicsComponent;
@@ -50,10 +57,12 @@ import components.SpriteComponent;
 public class SceneLoadingSystem extends EntitySystem {
 	private Family sceneTriggerFamily = Family.all(ScriptComponent.class).get();
 	private ComponentMapper<ScriptComponent> scriptCompMapper = ComponentMapper.getFor(ScriptComponent.class);
+	private BitmapFont font;
 	public enum Scenes { NONE, VILLAGE, TAVERN }
 	
 	public SceneLoadingSystem(int priority) {
 		super(priority);
+		font = new BitmapFont(false);
 	}
 	
 	@Override
@@ -75,25 +84,13 @@ public class SceneLoadingSystem extends EntitySystem {
 		}
 	}
 	
-	
-	
 	@Override
 	public void addedToEngine(Engine engine) {
 		createInitialEntities();
 		createVillageScene();
 	}
 
-	private void disposeAndRemoveEntity(Entity e) {
-		for (Component c : e.getComponents()) {
-			if (c instanceof Disposable) {
-				((Disposable) c).dispose();
-			}
-		}
-		
-		getEngine().removeEntity(e);
-	}
-	
-	private void createInitialEntities() {
+	private <T> void createInitialEntities() {
 		Entity player = new Entity();
 		player.flags |= EntityBits.PLAYER_BIT;
 		float playerWHRation = 20f / 28f;
@@ -151,12 +148,22 @@ public class SceneLoadingSystem extends EntitySystem {
 		
 		// Player script component 
 		Script playerMovementScript = new Script() {
+			
+			class InventorySlot {
+				public InventorySlot(int slot, int count) {
+					slotNumber = slot;
+					itemCount = count;
+				}
+				
+				int itemCount;
+				int slotNumber;
+			}
+			
 			private int lastMovingDirection = Keys.DOWN;
 			private ComponentMapper<PhysicsComponent> physicsComponentMapper = ComponentMapper.getFor(PhysicsComponent.class);
 			private ComponentMapper<AnimationComponent> animationComponentMapper = ComponentMapper.getFor(AnimationComponent.class);
-			private Hashtable<String, Integer> inventory = new Hashtable<String, Integer>();
-			private final float inventoryWeightLimit = 10f;
-			private float currentInventoryWeight = 0f;
+			private ComponentMapper<ItemComponent> itemComponentMapper = ComponentMapper.getFor(ItemComponent.class);
+			private Hashtable<String, InventorySlot> inventory = new Hashtable<String, InventorySlot>();
 			private boolean inventoryOpen = false;
 			
 			@Override
@@ -255,60 +262,86 @@ public class SceneLoadingSystem extends EntitySystem {
 
 			@Override
 			public void onEventListen(Entity self, Entity sender, String eventName) {
-				if (eventName.contentEquals("SetPlayerTavernInsidePosition")) {
-					self.getComponent(PhysicsComponent.class).body.setTransform(new Vector2(10.f, 2.f),  0.f);
-					self.getComponent(AnimationComponent.class).setActiveAnimation("IdleUp", false);
-				}
-				
-				if (eventName.contentEquals("SetPlayerTavernOutsidePosition")) {
-					self.getComponent(PhysicsComponent.class).body.setTransform(new Vector2(48.f, 8.f),  0.f);
-					self.getComponent(AnimationComponent.class).setActiveAnimation("IdleDown", false);
-				}
-				
-				if (eventName.contentEquals("PlayerPickedApple")) {
-					Item pickedItem = Item.APPLE;
-					if (inventory.containsKey(pickedItem.name)) {
-						Integer value = inventory.get(pickedItem.name);
-						value++;
-					} else {
-						inventory.put(pickedItem.name, 1);
-						GuiComponent inventory = self.getComponent(GuiComponent.class);
-						Image appleImage = new Image(new TextureRegion(new Texture(Gdx.files.internal("CL_DEMO\\!CL_DEMO_32x32.png")), 608, 576, 32, 32));
-						Group inventorySlot = ((Group)inventory.actors.getChild(this.inventory.size()));
-						Image borderImage = (Image)inventorySlot.getChild(0);
-						appleImage.setPosition(borderImage.getX(), borderImage.getY());
-						appleImage.setSize(borderImage.getWidth(), borderImage.getHeight());
-						inventorySlot.addActor(appleImage);
+				if (eventName.contentEquals("SceneChanged")) {
+					switch (scriptCompMapper.get(sender).newSceneToLoad) {
+						case VILLAGE:
+							self.getComponent(PhysicsComponent.class).body.setTransform(new Vector2(48.f, 8.f),  0.f);
+							self.getComponent(AnimationComponent.class).setActiveAnimation("IdleDown", false);
+							break;
+						
+						case TAVERN:
+							self.getComponent(PhysicsComponent.class).body.setTransform(new Vector2(10.f, 2.f),  0.f);
+							self.getComponent(AnimationComponent.class).setActiveAnimation("IdleUp", false);
+							break;
+						
+						case NONE:
+							break;
 					}
 					
-					currentInventoryWeight += pickedItem.weight;
+					scriptCompMapper.get(self).eventsToListen.add("SceneChanged");
+				}
+				
+				if (eventName.contentEquals("ItemPicked")) {
+					Item pickedItem = itemComponentMapper.get(sender).item;
+					GuiComponent inventoryGui = self.getComponent(GuiComponent.class);
+					if (inventory.containsKey(pickedItem.name)) {
+						InventorySlot slot = inventory.get(pickedItem.name);
+						slot.itemCount++;
+						Label slotLabel = (Label)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(2);
+						if (slot.itemCount > 1) {
+							slotLabel.setVisible(true);
+							slotLabel.setText(Integer.toString(slot.itemCount));
+						}
+					} else {
+						Group inventorySlot = ((Group)inventoryGui.actors.getChild(inventory.size()));
+						inventory.put(pickedItem.name, new InventorySlot(inventory.size(), 1));
+						Image itemImage = (Image)inventorySlot.getChild(1);
+						Image borderImage =  (Image)inventorySlot.getChild(0);
+						itemImage.setPosition(borderImage.getX(), borderImage.getY());
+						itemImage.setSize(borderImage.getWidth(), borderImage.getHeight());
+						itemImage.setDrawable(new TextureRegionDrawable(pickedItem.getTextureRegion()));
+					}
+					
+					scriptCompMapper.get(self).eventsToListen.add("ItemPicked");
 				}
 			}
 		};
-				
+		
 		ScriptComponent playerScriptComponent = new ScriptComponent(playerMovementScript);
-		playerScriptComponent.eventsToListen.add("SetPlayerTavernInsidePosition");
-		playerScriptComponent.eventsToListen.add("SetPlayerTavernOutsidePosition");
-		playerScriptComponent.eventsToListen.add("PlayerPickedApple");
+		playerScriptComponent.eventsToListen.add("SceneChanged");
+		playerScriptComponent.eventsToListen.add("ItemPicked");
 		player.add(playerScriptComponent);
 		
 		GuiComponent playerInventory = new GuiComponent();
 		playerInventory.actors.setVisible(false);
 		getEngine().getSystem(RenderingSystem.class).addGuiElement(playerInventory.actors);
-		final float firstImageX = playerInventory.actors.getStage().getWidth() / 2f - 10.f;
-		final float firstImageY = playerInventory.actors.getStage().getHeight() / 4f;
 		Pixmap backgroundBlack = new Pixmap(1, 1, Format.RGBA8888);
 		backgroundBlack.setColor(0.f, 0.f, 0.f, 0.2f);
 		backgroundBlack.fill();
 		Texture borderTexture = new Texture(Gdx.files.internal("InventoryItemBorder.png"));
+		LabelStyle labelStyle = new LabelStyle(font, Color.WHITE);
 		
-		for (int i = 0; i < 3; ++i) {
+		final float inventorySlotSize = 60f;
+		final float firstImageX = playerInventory.actors.getStage().getWidth() / 2f - inventorySlotSize * 5f;
+		final float firstImageY = playerInventory.actors.getStage().getHeight() / 4f;
+		
+		for (int i = 2; i >= 0; --i) {
 			for (int j = 0; j < 10; ++j) {
 				Image border = new Image(borderTexture);
-				border.setPosition(firstImageX + j * 2.f, firstImageY + i * 2.f);
-				border.setSize(2.f, 2.f);
+				border.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
+				border.setSize(inventorySlotSize, inventorySlotSize);
 				Group inventoryItemGroup = new Group();
+				Label label = new Label("0", labelStyle);
+				label.setFontScale(2f);
+				label.setPosition(firstImageX + j * inventorySlotSize + inventorySlotSize * (2f/3f), firstImageY + i * inventorySlotSize + inventorySlotSize * (1f/4f));
+				label.setSize(10f, 10f);
+				label.setVisible(false);
+				Image emptyImage = new Image();
+				emptyImage.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
+				emptyImage.setSize(inventorySlotSize, inventorySlotSize);
 				inventoryItemGroup.addActor(border);
+				inventoryItemGroup.addActor(new Image());
+				inventoryItemGroup.addActor(label);
 				playerInventory.actors.addActor(inventoryItemGroup);
 			}
 		}
@@ -321,7 +354,7 @@ public class SceneLoadingSystem extends EntitySystem {
 	private void createVillageScene() {
 		for (Entity e : getEngine().getEntities()) {
 			if ((e.flags & EntityBits.PLAYER_BIT) == 0) {
-				disposeAndRemoveEntity(e);
+				getEngine().removeEntity(e);
 			}
 		}
 		
@@ -397,7 +430,7 @@ public class SceneLoadingSystem extends EntitySystem {
 			public void update(Entity self, float deltaTime) {
 				if (openable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
 					ScriptComponent scriptComp = self.getComponent(ScriptComponent.class);
-					scriptComp.eventsToDispatch.add("SetPlayerTavernInsidePosition");
+					scriptComp.eventsToDispatch.add("SceneChanged");
 					scriptComp.newSceneToLoad = Scenes.TAVERN;
 				}
 			}
@@ -424,13 +457,12 @@ public class SceneLoadingSystem extends EntitySystem {
 			private final int maxApples = 20;
 			private int applesAvailable = 20;
 			private boolean pickable = false;
-			public Item appleItem = Item.APPLE;
 			private float newAppleTimer = 0.f;
 			
 			@Override
 			public void update(Entity self, float deltaTime) {
 				if (pickable && applesAvailable > 0 && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-					self.getComponent(ScriptComponent.class).eventsToDispatch.add("PlayerPickedApple");
+					self.getComponent(ScriptComponent.class).eventsToDispatch.add("ItemPicked");
 					--applesAvailable;
 				}
 				
@@ -458,11 +490,9 @@ public class SceneLoadingSystem extends EntitySystem {
 			@Override
 			public void onEventListen(Entity self, Entity sender, String eventName) {
 				// TODO Auto-generated method stub
-				
 			}
 		};
 		
-		// Tavern door entity
 		for (RectangleMapObject object : mapComp.map.getLayers().get("Interactables").getObjects().getByType(RectangleMapObject.class)) {
 			Entity interactable = new Entity();
 			PhysicsComponent interactablePhysicsComp = new PhysicsComponent();
@@ -493,6 +523,7 @@ public class SceneLoadingSystem extends EntitySystem {
 					
 				case "apple":
 					interactable.add(new ScriptComponent(appleTreesScript));
+					interactable.add(new ItemComponent(Item.APPLE));
 					getEngine().addEntity(interactable);
 					break;
 			}
@@ -502,7 +533,7 @@ public class SceneLoadingSystem extends EntitySystem {
 	private void createTavernScene() {
 		for (Entity e : getEngine().getEntities()) {
 			if ((e.flags & EntityBits.PLAYER_BIT) == 0) {
-				disposeAndRemoveEntity(e);
+				getEngine().removeEntity(e);
 			}
 		}
 		
@@ -582,7 +613,7 @@ public class SceneLoadingSystem extends EntitySystem {
 			public void update(Entity self, float deltaTime) {
 				if (openable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
 					ScriptComponent scriptComp = self.getComponent(ScriptComponent.class);
-					scriptComp.eventsToDispatch.add("SetPlayerTavernOutsidePosition");
+					scriptComp.eventsToDispatch.add("SceneChanged");
 					scriptComp.newSceneToLoad = Scenes.VILLAGE;
 				}
 			}

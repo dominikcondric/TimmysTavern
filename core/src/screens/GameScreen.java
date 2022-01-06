@@ -3,7 +3,9 @@ package screens;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Input.Keys;
@@ -11,6 +13,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.gdx.game.TimmysTavern;
 
+import components.AnimationComponent;
+import components.GuiComponent;
+import components.MapComponent;
+import components.MusicComponent;
+import components.PhysicsComponent;
+import components.SpriteComponent;
 import systems.AudioSystem;
 import systems.PhysicsSystem;
 import systems.RenderingSystem;
@@ -29,6 +37,28 @@ public class GameScreen implements Screen {
 		ecs.addSystem(new PhysicsSystem(new Vector2(0.f, 0.f), 1));
 		ecs.addSystem(new AudioSystem(4));
 		ecs.addSystem(new SceneLoadingSystem(0));
+		addListeners();
+	}
+	
+	private void addListeners() {
+		addDisposeEntityListener(MapComponent.class);
+		addDisposeEntityListener(SpriteComponent.class);
+		addDisposeEntityListener(AnimationComponent.class);
+		addDisposeEntityListener(PhysicsComponent.class);
+		addDisposeEntityListener(GuiComponent.class);
+		addDisposeEntityListener(MusicComponent.class);
+	}
+	
+	private <T extends Component & Disposable> void addDisposeEntityListener(final Class<T> cls) {
+		ecs.addEntityListener(Family.all(cls).get(), new EntityListener() {
+			@Override
+			public void entityRemoved(Entity entity) {
+				entity.getComponent(cls).dispose();
+			}
+			
+			@Override
+			public void entityAdded(Entity entity) {}
+		});
 	}
 	
 	@Override
