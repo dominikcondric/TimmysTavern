@@ -8,6 +8,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,6 +18,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import components.AnimationComponent;
@@ -60,11 +62,11 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 		
 		for (Entity e : engine.getEntitiesFor(animationComponentFamily)) {
 			AnimationComponent animationComp = animationCompMapper.get(e);
-			spriteCompMapper.get(e).setSprite(animationComp.getActiveSprite(deltaTime));
+			spriteCompMapper.get(e).setSprite(animationComp.getActiveSprite(deltaTime), false);
 		}
 		
 		Vector2 playerPosition = null;
-		Vector2 mapSize = null;
+		Vector2 mapSize = new Vector2(100f, 100f);
 		batch.begin();
 		for (Entity e : engine.getEntitiesFor(mapComponentFamily)) {
 			MapComponent mapComp = mapCompMapper.get(e);

@@ -18,6 +18,7 @@ public enum Item {
 	public final int textureY;
 	public final int textureWidth;
 	public final int textureHeight;
+	public static final String itemPickingSoundFile = "RPGsounds_Kenney\\OGG\\handleSmallLeather2.ogg";
 	
 	private Item(String itemName, float itemWeight, String texPath, int x, int y, int w, int h) {
 		this.name = itemName;

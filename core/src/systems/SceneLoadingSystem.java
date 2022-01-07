@@ -50,9 +50,13 @@ import components.ItemComponent;
 import components.MapComponent;
 import components.MusicComponent;
 import components.PhysicsComponent;
-import components.Script;
 import components.ScriptComponent;
+import components.SoundComponent;
 import components.SpriteComponent;
+import scripts.DoorScript;
+import scripts.FruitItemScript;
+import scripts.PlayerScript;
+import scripts.Script;
 
 public class SceneLoadingSystem extends EntitySystem {
 	private Family sceneTriggerFamily = Family.all(ScriptComponent.class).get();
@@ -90,7 +94,7 @@ public class SceneLoadingSystem extends EntitySystem {
 		createVillageScene();
 	}
 
-	private <T> void createInitialEntities() {
+	private void createInitialEntities() {
 		Entity player = new Entity();
 		player.flags |= EntityBits.PLAYER_BIT;
 		float playerWHRation = 20f / 28f;
@@ -100,11 +104,11 @@ public class SceneLoadingSystem extends EntitySystem {
 		// Player sprite/animation components
 		Array<Sprite>[] playerAnimationSprites = new Array[8];
 		int playerTextureRegionWidth = 20;
-		int playerTextureRegionHeight = 28;
+		int playerTextureRegionHeight = 30;
 		for (int i = 0; i < 8; ++i) {
 			playerAnimationSprites[i] = new Array<Sprite>(4);
 			for (int j = 0; j < 4; ++j) {
-				Sprite sprite = new Sprite(new TextureRegion(new Texture(Gdx.files.internal("Free Asset Pack\\Characters\\Character 1.png")), 2 + j * (playerTextureRegionWidth + 4), 4 + ((playerTextureRegionHeight + 4) * i), playerTextureRegionWidth, playerTextureRegionHeight));
+				Sprite sprite = new Sprite(new TextureRegion(new Texture(Gdx.files.internal("Free Asset Pack\\Characters\\Character 1.png")), 2 + j * (playerTextureRegionWidth + 4), 2 + ((playerTextureRegionHeight + 2) * i), playerTextureRegionWidth, playerTextureRegionHeight));
 				sprite.setPosition(playerPosition.x, playerPosition.y);
 				sprite.setSize(playerSize.x, playerSize.y);
 				playerAnimationSprites[i].add(sprite);
@@ -137,7 +141,7 @@ public class SceneLoadingSystem extends EntitySystem {
 		
 		FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(playerSize.x / 4.f, playerSize.y / 8.f, new Vector2(0.f, -playerSize.y / 4f - 0.1f), 0.f);
+		shape.setAsBox(playerSize.x / 8.f, playerSize.y / 12.f, new Vector2(0.f, -playerSize.y / 4f - 0.2f), 0.f);
 		fixtureDef.shape = shape;
 		fixtureDef.filter.categoryBits = EntityBits.PLAYER_B2D_BIT;
 		fixtureDef.filter.maskBits = 0xFF;
@@ -146,168 +150,7 @@ public class SceneLoadingSystem extends EntitySystem {
 		
 		playerPhysicsComp.body.setTransform(new Vector2(48.f, 8.f), 0f);
 		
-		// Player script component 
-		Script playerMovementScript = new Script() {
-			
-			class InventorySlot {
-				public InventorySlot(int slot, int count) {
-					slotNumber = slot;
-					itemCount = count;
-				}
-				
-				int itemCount;
-				int slotNumber;
-			}
-			
-			private int lastMovingDirection = Keys.DOWN;
-			private ComponentMapper<PhysicsComponent> physicsComponentMapper = ComponentMapper.getFor(PhysicsComponent.class);
-			private ComponentMapper<AnimationComponent> animationComponentMapper = ComponentMapper.getFor(AnimationComponent.class);
-			private ComponentMapper<ItemComponent> itemComponentMapper = ComponentMapper.getFor(ItemComponent.class);
-			private Hashtable<String, InventorySlot> inventory = new Hashtable<String, InventorySlot>();
-			private boolean inventoryOpen = false;
-			
-			@Override
-			public void update(Entity self, float deltaTime) {
-				if (Gdx.input.isKeyJustPressed(Keys.I)) {
-					inventoryOpen = !inventoryOpen;
-					self.getComponent(GuiComponent.class).actors.setVisible(inventoryOpen);
-				}
-				
-				Body body = physicsComponentMapper.get(self).body;
-				
-				body.setLinearVelocity(0.f, 0.f);
-				
-				int newMovingDirection = 0;
-				int directionKeys[] = { Keys.UP, Keys.DOWN, Keys.RIGHT, Keys.LEFT };
-				
-				if (lastMovingDirection != 0) {
-					for (int i = 0; i < directionKeys.length; ++i) {
-						if (directionKeys[i] == lastMovingDirection) {
-							directionKeys[i] = directionKeys[0];
-							directionKeys[0] = lastMovingDirection;
-							break;
-						}
-					}
-				}
-				
-				for (int key : directionKeys) {
-					if (Gdx.input.isKeyPressed(key)) {
-						switch (key) {
-							case Keys.RIGHT:
-								body.setLinearVelocity(4f, 0f);
-								newMovingDirection = Keys.RIGHT;
-								break;
-							case Keys.LEFT:
-								body.setLinearVelocity(-4f, 0f);
-								newMovingDirection = Keys.LEFT;
-								break;
-							case Keys.UP:
-								body.setLinearVelocity(0f, 4f);
-								newMovingDirection = Keys.UP;
-								break;
-							case Keys.DOWN:
-								body.setLinearVelocity(0f, -4f);
-								newMovingDirection = Keys.DOWN;
-								break;
-						}
-						
-						break;
-					}
-				}
-				
-				if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-					body.setLinearVelocity(body.getLinearVelocity().scl(2.f));
-				
-				AnimationComponent animationComponent = animationComponentMapper.get(self);
-				if (newMovingDirection != 0 && lastMovingDirection != newMovingDirection) {
-					switch (newMovingDirection) {
-						case Keys.DOWN:
-							animationComponent.setActiveAnimation("WalkDown", true);
-							break;
-						case Keys.UP:
-							animationComponent.setActiveAnimation("WalkUp", true);
-							break;
-						case Keys.RIGHT:
-							animationComponent.setActiveAnimation("WalkRight", true);
-							break;
-						case Keys.LEFT:
-							animationComponent.setActiveAnimation("WalkLeft", true);
-							break;
-					}
-				} else if (newMovingDirection == 0 && lastMovingDirection != 0) {
-					switch (lastMovingDirection) {
-						case Keys.DOWN:
-							animationComponent.setActiveAnimation("IdleDown", true);
-							break;
-						case Keys.UP:
-							animationComponent.setActiveAnimation("IdleUp", true);
-							break;
-						case Keys.RIGHT:
-							animationComponent.setActiveAnimation("IdleRight", true);
-							break;
-						case Keys.LEFT:
-							animationComponent.setActiveAnimation("IdleLeft", true);
-							break;
-					}
-				}
-				
-				lastMovingDirection = newMovingDirection;
-			}
-			
-			@Override
-			public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {}
-
-			@Override
-			public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {}
-
-			@Override
-			public void onEventListen(Entity self, Entity sender, String eventName) {
-				if (eventName.contentEquals("SceneChanged")) {
-					switch (scriptCompMapper.get(sender).newSceneToLoad) {
-						case VILLAGE:
-							self.getComponent(PhysicsComponent.class).body.setTransform(new Vector2(48.f, 8.f),  0.f);
-							self.getComponent(AnimationComponent.class).setActiveAnimation("IdleDown", false);
-							break;
-						
-						case TAVERN:
-							self.getComponent(PhysicsComponent.class).body.setTransform(new Vector2(10.f, 2.f),  0.f);
-							self.getComponent(AnimationComponent.class).setActiveAnimation("IdleUp", false);
-							break;
-						
-						case NONE:
-							break;
-					}
-					
-					scriptCompMapper.get(self).eventsToListen.add("SceneChanged");
-				}
-				
-				if (eventName.contentEquals("ItemPicked")) {
-					Item pickedItem = itemComponentMapper.get(sender).item;
-					GuiComponent inventoryGui = self.getComponent(GuiComponent.class);
-					if (inventory.containsKey(pickedItem.name)) {
-						InventorySlot slot = inventory.get(pickedItem.name);
-						slot.itemCount++;
-						Label slotLabel = (Label)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(2);
-						if (slot.itemCount > 1) {
-							slotLabel.setVisible(true);
-							slotLabel.setText(Integer.toString(slot.itemCount));
-						}
-					} else {
-						Group inventorySlot = ((Group)inventoryGui.actors.getChild(inventory.size()));
-						inventory.put(pickedItem.name, new InventorySlot(inventory.size(), 1));
-						Image itemImage = (Image)inventorySlot.getChild(1);
-						Image borderImage =  (Image)inventorySlot.getChild(0);
-						itemImage.setPosition(borderImage.getX(), borderImage.getY());
-						itemImage.setSize(borderImage.getWidth(), borderImage.getHeight());
-						itemImage.setDrawable(new TextureRegionDrawable(pickedItem.getTextureRegion()));
-					}
-					
-					scriptCompMapper.get(self).eventsToListen.add("ItemPicked");
-				}
-			}
-		};
-		
-		ScriptComponent playerScriptComponent = new ScriptComponent(playerMovementScript);
+		ScriptComponent playerScriptComponent = new ScriptComponent(new PlayerScript());
 		playerScriptComponent.eventsToListen.add("SceneChanged");
 		playerScriptComponent.eventsToListen.add("ItemPicked");
 		player.add(playerScriptComponent);
@@ -321,17 +164,17 @@ public class SceneLoadingSystem extends EntitySystem {
 		Texture borderTexture = new Texture(Gdx.files.internal("InventoryItemBorder.png"));
 		LabelStyle labelStyle = new LabelStyle(font, Color.WHITE);
 		
-		final float inventorySlotSize = 60f;
-		final float firstImageX = playerInventory.actors.getStage().getWidth() / 2f - inventorySlotSize * 5f;
-		final float firstImageY = playerInventory.actors.getStage().getHeight() / 4f;
+		final float inventorySlotSize = playerInventory.actors.getStage().getWidth() / 30.f;
+		final float firstImageX = playerInventory.actors.getStage().getWidth() - inventorySlotSize * 6;
+		final float firstImageY = playerInventory.actors.getStage().getHeight() - inventorySlotSize * 6;
 		
-		for (int i = 2; i >= 0; --i) {
-			for (int j = 0; j < 10; ++j) {
+		for (int i = 4; i >= 0; --i) {
+			for (int j = 0; j < 5; ++j) {
 				Image border = new Image(borderTexture);
 				border.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
 				border.setSize(inventorySlotSize, inventorySlotSize);
 				Group inventoryItemGroup = new Group();
-				Label label = new Label("0", labelStyle);
+				Label label = new Label("", labelStyle);
 				label.setFontScale(2f);
 				label.setPosition(firstImageX + j * inventorySlotSize + inventorySlotSize * (2f/3f), firstImageY + i * inventorySlotSize + inventorySlotSize * (1f/4f));
 				label.setSize(10f, 10f);
@@ -346,9 +189,14 @@ public class SceneLoadingSystem extends EntitySystem {
 			}
 		}
 		
-		player.add(playerInventory);
-		getEngine().addEntity(player);
 		backgroundBlack.dispose();
+		player.add(playerInventory);
+		
+		SoundComponent playerSoundComp = new SoundComponent();
+		playerSoundComp.addSound("inventoryOpen", Gdx.files.internal("RPGsounds_Kenney\\OGG\\bookOpen.ogg"), false, false);
+		player.add(playerSoundComp);
+		
+		getEngine().addEntity(player);
 	}
 	
 	private void createVillageScene() {
@@ -367,7 +215,7 @@ public class SceneLoadingSystem extends EntitySystem {
 		MusicComponent musicComp = (MusicComponent)mapEntity.addAndReturn(new MusicComponent(Gdx.files.internal("PGS Fantasy RPG Music Pack/Town-Village Theme 1.ogg")));
 		musicComp.music.setLooping(true);
 		musicComp.shouldPlay = true;
-		musicComp.music.setVolume(0.7f);
+		musicComp.music.setVolume(0.2f);
 
 		PhysicsSystem physicsSystem = getEngine().getSystem(PhysicsSystem.class);
 		PhysicsComponent mapPhysicsComp = (PhysicsComponent)mapEntity.addAndReturn(new PhysicsComponent());
@@ -423,76 +271,6 @@ public class SceneLoadingSystem extends EntitySystem {
 		mapPhysicsComp.body = body;
 		getEngine().addEntity(mapEntity);
 		
-		Script doorsScript = new Script() {
-			private boolean openable = false;
-			
-			@Override
-			public void update(Entity self, float deltaTime) {
-				if (openable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-					ScriptComponent scriptComp = self.getComponent(ScriptComponent.class);
-					scriptComp.eventsToDispatch.add("SceneChanged");
-					scriptComp.newSceneToLoad = Scenes.TAVERN;
-				}
-			}
-			
-			@Override
-			public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {
-				if ((((Entity)other.getUserData()).flags & EntityBits.PLAYER_BIT) != 0) {
-					openable = false;
-				}
-			}
-			
-			@Override
-			public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {
-				if ((((Entity)other.getUserData()).flags & EntityBits.PLAYER_BIT) != 0) {
-					openable = true;
-				}
-			}
-
-			@Override
-			public void onEventListen(Entity self, Entity sender, String eventName) {}
-		};
-		
-		Script appleTreesScript = new Script() {
-			private final int maxApples = 20;
-			private int applesAvailable = 20;
-			private boolean pickable = false;
-			private float newAppleTimer = 0.f;
-			
-			@Override
-			public void update(Entity self, float deltaTime) {
-				if (pickable && applesAvailable > 0 && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-					self.getComponent(ScriptComponent.class).eventsToDispatch.add("ItemPicked");
-					--applesAvailable;
-				}
-				
-				newAppleTimer += deltaTime;
-				if (newAppleTimer >= 60f) {
-					applesAvailable = Math.min(applesAvailable + 1, maxApples);
-					newAppleTimer = 0.f;
-				}
-			}
-			
-			@Override
-			public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {
-				if ((((Entity)other.getUserData()).flags & EntityBits.PLAYER_BIT) != 0) {
-					pickable = false;
-				}
-			}
-			
-			@Override
-			public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {
-				if ((((Entity)other.getUserData()).flags & EntityBits.PLAYER_BIT) != 0) {
-					pickable = true;
-				}
-			}
-
-			@Override
-			public void onEventListen(Entity self, Entity sender, String eventName) {
-				// TODO Auto-generated method stub
-			}
-		};
-		
 		for (RectangleMapObject object : mapComp.map.getLayers().get("Interactables").getObjects().getByType(RectangleMapObject.class)) {
 			Entity interactable = new Entity();
 			PhysicsComponent interactablePhysicsComp = new PhysicsComponent();
@@ -517,15 +295,41 @@ public class SceneLoadingSystem extends EntitySystem {
 			
 			switch (object.getName()) {
 				case "TavernDoor":
-					interactable.add(new ScriptComponent(doorsScript));
+				{
+					interactable.add(new ScriptComponent(new DoorScript(Scenes.TAVERN)));
 					getEngine().addEntity(interactable);
 					break;
-					
+				}
 				case "apple":
-					interactable.add(new ScriptComponent(appleTreesScript));
+				{
+					interactable.add(new ScriptComponent(new FruitItemScript(20, 60.f)));
 					interactable.add(new ItemComponent(Item.APPLE));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					itemSoundComp.addSound("itemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
 					getEngine().addEntity(interactable);
 					break;
+				}
+				case "cranberry":
+				{
+					interactable.add(new ScriptComponent(new FruitItemScript(40, 10f)));
+					interactable.add(new ItemComponent(Item.CRANBERRY));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					itemSoundComp.addSound("itemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					getEngine().addEntity(interactable);
+					break;
+				}
+				case "blueberry":
+				{
+					interactable.add(new ScriptComponent(new FruitItemScript(40, 10f)));
+					interactable.add(new ItemComponent(Item.BLUEBERRY));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					itemSoundComp.addSound("itemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					getEngine().addEntity(interactable);
+					break;
+				}
 			}
 		}
 	}
@@ -545,7 +349,7 @@ public class SceneLoadingSystem extends EntitySystem {
 		MusicComponent musicComp = (MusicComponent)mapEntity.addAndReturn(new MusicComponent(Gdx.files.internal("PGS Fantasy RPG Music Pack/Town-Village Theme 3.ogg")));
 		musicComp.music.setLooping(true);
 		musicComp.shouldPlay = true;
-		musicComp.music.setVolume(0.7f);
+		musicComp.music.setVolume(0.2f);
 
 		PhysicsSystem physicsSystem = getEngine().getSystem(PhysicsSystem.class);
 		PhysicsComponent mapPhysicsComp = (PhysicsComponent)mapEntity.addAndReturn(new PhysicsComponent());
@@ -605,38 +409,7 @@ public class SceneLoadingSystem extends EntitySystem {
 		tavernDoorPhysicsComp.body = body;
 		tavernDoor.add(tavernDoorPhysicsComp);
 		
-		Script tavernDoorScript = new Script() {
-			private boolean openable = false;
-			
-			
-			@Override
-			public void update(Entity self, float deltaTime) {
-				if (openable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-					ScriptComponent scriptComp = self.getComponent(ScriptComponent.class);
-					scriptComp.eventsToDispatch.add("SceneChanged");
-					scriptComp.newSceneToLoad = Scenes.VILLAGE;
-				}
-			}
-			
-			@Override
-			public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {
-				if ((((Entity)other.getUserData()).flags & EntityBits.PLAYER_BIT) != 0) {
-					openable = false;
-				}
-			}
-			
-			@Override
-			public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {
-				if ((((Entity)other.getUserData()).flags & EntityBits.PLAYER_BIT) != 0) {
-					openable = true;
-				}
-			}
-
-			@Override
-			public void onEventListen(Entity self, Entity sender, String eventName) {}
-		};
-		
-		tavernDoor.add(new ScriptComponent(tavernDoorScript));
+		tavernDoor.add(new ScriptComponent(new DoorScript(Scenes.VILLAGE)));
 		getEngine().addEntity(tavernDoor);
 	}
 }

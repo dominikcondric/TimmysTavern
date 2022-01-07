@@ -18,6 +18,7 @@ import components.GuiComponent;
 import components.MapComponent;
 import components.MusicComponent;
 import components.PhysicsComponent;
+import components.SoundComponent;
 import components.SpriteComponent;
 import systems.AudioSystem;
 import systems.PhysicsSystem;
@@ -47,6 +48,7 @@ public class GameScreen implements Screen {
 		addDisposeEntityListener(PhysicsComponent.class);
 		addDisposeEntityListener(GuiComponent.class);
 		addDisposeEntityListener(MusicComponent.class);
+		addDisposeEntityListener(SoundComponent.class);
 	}
 	
 	private <T extends Component & Disposable> void addDisposeEntityListener(final Class<T> cls) {

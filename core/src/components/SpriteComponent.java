@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 
 public class SpriteComponent implements Component, Disposable {
-	private Sprite sprite;
+	private Sprite sprite = null;
 	public Color tintColor;
 	public Vector2 position;
 	public boolean draw = true;
@@ -37,7 +37,10 @@ public class SpriteComponent implements Component, Disposable {
 			batch.draw(sprite, position.x, position.y, sprite.getWidth(), sprite.getHeight());
 	}
 	
-	public void setSprite(Sprite sprite) {
+	public void setSprite(Sprite sprite, boolean disposePreviousSprite) {
+		if (sprite != null && disposePreviousSprite)
+			dispose();
+		
 		this.sprite = sprite;
 	}
 
