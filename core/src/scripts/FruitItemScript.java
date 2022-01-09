@@ -30,7 +30,7 @@ public class FruitItemScript extends Script {
 	public void update(Entity self, float deltaTime) {
 		if (pickable && fruitsAvailable > 0 && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
 			scriptCompMapper.get(self).eventsToDispatch.add("ItemPicked");
-			soundCompMapper.get(self).getSoundEffect("itemPicked").shouldPlay = true;
+			soundCompMapper.get(self).getSoundEffect("ItemPicked").shouldPlay = true;
 			--fruitsAvailable;
 		}
 		
@@ -56,7 +56,12 @@ public class FruitItemScript extends Script {
 	}
 
 	@Override
-	public void onEventListen(Entity self, Entity sender, String eventName) {
+	public void onEventListened(Entity self, Entity sender, String eventName) {
 		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void onEventReceived(Entity self, Entity receiver, String eventName) {
+		scriptCompMapper.get(self).eventsToDispatch.remove("ItemPicked");
 	}
 }

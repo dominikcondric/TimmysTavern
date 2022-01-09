@@ -17,8 +17,8 @@ import com.gdx.game.Item;
 import components.AnimationComponent;
 import components.GuiComponent;
 import components.ItemComponent;
+import components.NewSceneComponent;
 import components.PhysicsComponent;
-import components.ScriptComponent;
 import components.SoundComponent;
 
 public class PlayerScript extends Script {
@@ -37,7 +37,6 @@ public class PlayerScript extends Script {
 	private ComponentMapper<PhysicsComponent> physicsComponentMapper = ComponentMapper.getFor(PhysicsComponent.class);
 	private ComponentMapper<AnimationComponent> animationComponentMapper = ComponentMapper.getFor(AnimationComponent.class);
 	private ComponentMapper<ItemComponent> itemComponentMapper = ComponentMapper.getFor(ItemComponent.class);
-	private ComponentMapper<ScriptComponent> scriptComponentMapper = ComponentMapper.getFor(ScriptComponent.class);
 	private ComponentMapper<GuiComponent> guiComponentMapper = ComponentMapper.getFor(GuiComponent.class);
 	private ComponentMapper<SoundComponent> soundComponentMapper = ComponentMapper.getFor(SoundComponent.class);
 	private Hashtable<String, InventorySlot> inventory = new Hashtable<String, InventorySlot>();
@@ -133,24 +132,19 @@ public class PlayerScript extends Script {
 	}
 	
 	@Override
-	public void onEventListen(Entity self, Entity sender, String eventName) {
+	public void onEventListened(Entity self, Entity sender, String eventName) {
 		if (eventName.contentEquals("SceneChanged")) {
-			switch (scriptComponentMapper.get(sender).newSceneToLoad) {
-				case VILLAGE:
+			switch (sender.getComponent(NewSceneComponent.class).sceneName) {
+				case "village":
 					physicsComponentMapper.get(self).body.setTransform(new Vector2(48.f, 8.f),  0.f);
 					animationComponentMapper.get(self).setActiveAnimation("IdleDown", false);
 					break;
 				
-				case TAVERN:
+				case "tavern":
 					physicsComponentMapper.get(self).body.setTransform(new Vector2(10.f, 2.f),  0.f);
 					animationComponentMapper.get(self).setActiveAnimation("IdleUp", false);
 					break;
-				
-				case NONE:
-					break;
 			}
-			
-			scriptComponentMapper.get(self).eventsToListen.add("SceneChanged");
 		}
 		
 		if (eventName.contentEquals("ItemPicked")) {
@@ -173,8 +167,6 @@ public class PlayerScript extends Script {
 				itemImage.setSize(borderImage.getWidth(), borderImage.getHeight());
 				itemImage.setDrawable(new TextureRegionDrawable(pickedItem.getTextureRegion()));
 			}
-			
-			scriptComponentMapper.get(self).eventsToListen.add("ItemPicked");
 		}
 	}
 }

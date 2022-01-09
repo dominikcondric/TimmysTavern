@@ -37,13 +37,17 @@ public class SpriteComponent implements Component, Disposable {
 			batch.draw(sprite, position.x, position.y, sprite.getWidth(), sprite.getHeight());
 	}
 	
+	public void setScale(float scale) {
+		sprite.scale(scale);
+	}
+	
 	public void setSprite(Sprite sprite, boolean disposePreviousSprite) {
 		if (sprite != null && disposePreviousSprite)
 			dispose();
 		
 		this.sprite = sprite;
 	}
-
+	
 	@Override
 	public void dispose() {
 		sprite.getTexture().dispose();

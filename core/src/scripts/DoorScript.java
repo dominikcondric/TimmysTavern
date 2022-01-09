@@ -7,23 +7,18 @@ import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Fixture;
 
 import components.EntityBits;
+import components.NewSceneComponent;
 import components.ScriptComponent;
-import systems.SceneLoadingSystem.Scenes;
 
 public class DoorScript extends Script {
-	public Scenes sceneToLoad;
 	private boolean openable = false;
-	
-	public DoorScript(Scenes sceneToLoad) {
-		this.sceneToLoad = sceneToLoad;
-	}
 	
 	@Override
 	public void update(Entity self, float deltaTime) {
 		if (openable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
 			ScriptComponent scriptComp = self.getComponent(ScriptComponent.class);
 			scriptComp.eventsToDispatch.add("SceneChanged");
-			scriptComp.newSceneToLoad = sceneToLoad;
+			self.getComponent(NewSceneComponent.class).load = true;
 		}
 	}
 	
