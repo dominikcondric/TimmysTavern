@@ -8,7 +8,7 @@ import screens.MainMenuScreen;
 
 public class TimmysTavern extends Game {
 	public SpriteBatch batch;
-	public BitmapFont font;
+	public static BitmapFont font;
 	
 	@Override
 	public void create () {

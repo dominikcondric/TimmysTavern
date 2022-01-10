@@ -83,7 +83,7 @@
   <object id="5" x="576" y="384" width="32" height="64"/>
   <object id="6" x="416" y="320" width="128" height="64"/>
   <object id="7" x="416" y="224" width="128" height="64"/>
-  <object id="8" x="96" y="320" width="128" height="64"/>
+  <object id="8" x="96" y="320" width="128" height="96"/>
   <object id="9" x="32" y="224" width="256" height="64"/>
   <object id="10" x="256" y="192" width="32" height="32"/>
   <object id="11" x="32" y="192" width="192"/>
@@ -94,9 +94,8 @@
   <object id="16" x="32" y="192" height="192"/>
  </objectgroup>
  <objectgroup id="5" name="Interactables">
-  <object id="17" name="Chest" x="160" y="128" width="64" height="64"/>
-  <object id="19" name="Cooker2" x="96" y="128" width="64" height="64"/>
-  <object id="20" name="Cooker1" x="32" y="128" width="64" height="64"/>
+  <object id="17" name="Chest" x="160" y="128" width="64" height="96"/>
+  <object id="20" name="Cooker" x="32" y="128" width="128" height="96"/>
   <object id="21" name="TavernDoor" x="288" y="416" width="64" height="62.6119"/>
  </objectgroup>
 </map>

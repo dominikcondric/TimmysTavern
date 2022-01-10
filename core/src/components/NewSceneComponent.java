@@ -1,17 +1,17 @@
 package components;
 
-import com.badlogic.ashley.core.Component;
+import java.util.ArrayList;
 
-import scripts.NewSceneScript;
+import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Entity;
 
 public class NewSceneComponent implements Component {
-	public int flagsToSkip = EntityBits.CAMERA_BIT | EntityBits.PLAYER_BIT;
+	public int flagsToSkip = EntityBits.NO_DESTROY_BIT;
 	public boolean load = false;
 	public final String sceneName;
-	public NewSceneScript newSceneScript;
+	public ArrayList<Entity> newEntities;
 	
-	public NewSceneComponent(NewSceneScript newSceneScript, String sceneName) {
-		this.newSceneScript = newSceneScript;
+	public NewSceneComponent(String sceneName) {
 		this.sceneName = sceneName;
 	}
 }

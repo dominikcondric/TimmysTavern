@@ -14,12 +14,16 @@ public class FollowingCameraScript extends Script {
 	private ComponentMapper<CameraComponent> camCompMapper = ComponentMapper.getFor(CameraComponent.class);
 	private ComponentMapper<PhysicsComponent> physicsCompMapper = ComponentMapper.getFor(PhysicsComponent.class);
 	
+	public FollowingCameraScript(Entity selfEntity) {
+		super(selfEntity);
+	}
+	
 	@Override
-	public void update(Entity self, float deltaTime) {
+	public void update(float deltaTime) {
 	}
 
 	@Override
-	public void onEventListened(Entity self, Entity sender, String eventName) {
+	public void onEventReceived(Entity sender, String eventName) {
 		CameraComponent camComp = camCompMapper.get(self);
 		OrthographicCamera camera = camComp.camera;
 		Vector2 xLimits = camComp.xLimits;
@@ -57,6 +61,7 @@ public class FollowingCameraScript extends Script {
 				case "village":
 					xLimits.y = 100.f;
 					yLimits.y = 100.f;
+					break;
 			}
 		}
 	}

@@ -11,7 +11,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 
 import components.NewSceneComponent;
 import components.ScriptComponent;
-import utility.B2DBodyCreator;
 
 public class ScriptingSystem extends EntitySystem {
 	private Family scriptingCompFamily = Family.all(ScriptComponent.class).get();
@@ -20,7 +19,6 @@ public class ScriptingSystem extends EntitySystem {
 	private ComponentMapper<NewSceneComponent> newSceneCompMapper = ComponentMapper.getFor(NewSceneComponent.class);
 	private HashMap<String, Event> eventsTable;
 	private ArrayList<Event> completedEvents;
-	private B2DBodyCreator bodyCreator;
 	
 	private class Event {
 		Event(String event) {
@@ -32,9 +30,8 @@ public class ScriptingSystem extends EntitySystem {
 		Entity dispatcher;
 	}
 	
-	public ScriptingSystem(B2DBodyCreator bodyCreator, int priority) {
+	public ScriptingSystem(int priority) {
 		super(priority);
-		this.bodyCreator = bodyCreator;
 		eventsTable = new HashMap<String, Event>();
 		completedEvents = new ArrayList<>();
 	}
@@ -45,7 +42,7 @@ public class ScriptingSystem extends EntitySystem {
 		for (final Entity e : scriptingEnts) {
 			ScriptComponent scriptComp = scriptCompMapper.get(e);
 			
-			scriptComp.script.update(e, deltaTime);
+			scriptComp.script.update(deltaTime);
 			for (String eventName : scriptComp.eventsToDispatch) {
 				Event event = eventsTable.get(eventName);
 				if (event != null) {
@@ -74,8 +71,8 @@ public class ScriptingSystem extends EntitySystem {
 		
 		for (Event event : completedEvents) {
 			for (Entity listener : event.listeners) {
-				scriptCompMapper.get(listener).script.onEventListened(listener, event.dispatcher, event.eventName);
-				scriptCompMapper.get(event.dispatcher).script.onEventReceived(event.dispatcher, listener, event.eventName);
+				scriptCompMapper.get(listener).script.onEventReceived(event.dispatcher, event.eventName);
+				scriptCompMapper.get(event.dispatcher).script.onEventResponse(listener, event.eventName);
 			}
 		}
 		
@@ -86,19 +83,12 @@ public class ScriptingSystem extends EntitySystem {
 			NewSceneComponent newSceneComp = newSceneCompMapper.get(newSceneEntity);
 			if (newSceneComp.load) {
 				newSceneComp.load = false;
-				for (Entity e : getEngine().getEntities()) {
-					if ((e.flags & newSceneComp.flagsToSkip) == 0) {
-						getEngine().removeEntity(e);
-					}
-				}
+				getEngine().removeAllEntities();
 				
-				ArrayList<Entity> newEntitiesToLoad = new ArrayList<Entity>();
-				newSceneComp.newSceneScript.loadNewScene(newEntitiesToLoad, bodyCreator);
-				for (Entity e : newEntitiesToLoad) {
+				for (Entity e : newSceneComp.newEntities) {
 					getEngine().addEntity(e);
 				}
 				
-				newEntitiesToLoad.clear();
 				break;
 			}
 		}

@@ -692,12 +692,12 @@
  </objectgroup>
  <objectgroup id="13" name="Interactables">
   <object id="60" name="TavernDoor" x="1504" y="2944" width="64" height="32"/>
-  <object id="70" name="blueberry" x="32" y="2976" width="96" height="96"/>
-  <object id="71" name="blueberry" x="32" y="2880" width="96" height="96"/>
-  <object id="72" name="blueberry" x="32" y="2784" width="96" height="96"/>
-  <object id="73" name="cranberry" x="32" y="2688" width="96" height="96"/>
-  <object id="74" name="cranberry" x="32" y="2592" width="96" height="96"/>
-  <object id="75" name="cranberry" x="32" y="2496" width="96" height="96"/>
+  <object id="70" name="blueberry" x="32" y="3008" width="96" height="32"/>
+  <object id="71" name="blueberry" x="32" y="2912" width="96" height="32"/>
+  <object id="72" name="blueberry" x="32" y="2816" width="96" height="32"/>
+  <object id="73" name="cranberry" x="32" y="2720" width="96" height="32"/>
+  <object id="74" name="cranberry" x="32" y="2624" width="96" height="32"/>
+  <object id="75" name="cranberry" x="32" y="2528" width="96" height="32"/>
   <object id="76" name="apple" x="608" y="2976" width="96" height="96"/>
  </objectgroup>
 </map>

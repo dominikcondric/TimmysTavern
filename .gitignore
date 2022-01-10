@@ -117,3 +117,4 @@ Thumbs.db
 /core/assets/*
 !/core/assets/Maps
 !/core/assets/AssetSources.txt
+!/core/assets/InventoryItemBorder.png

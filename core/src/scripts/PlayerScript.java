@@ -39,11 +39,18 @@ public class PlayerScript extends Script {
 	private ComponentMapper<ItemComponent> itemComponentMapper = ComponentMapper.getFor(ItemComponent.class);
 	private ComponentMapper<GuiComponent> guiComponentMapper = ComponentMapper.getFor(GuiComponent.class);
 	private ComponentMapper<SoundComponent> soundComponentMapper = ComponentMapper.getFor(SoundComponent.class);
-	private Hashtable<String, InventorySlot> inventory = new Hashtable<String, InventorySlot>();
+	Hashtable<String, InventorySlot> inventory = new Hashtable<String, InventorySlot>();
 	private boolean inventoryOpen = false;
 	
+	
+	
+	public PlayerScript(Entity selfEntity) {
+		super(selfEntity);
+	}
+
+	
 	@Override
-	public void update(Entity self, float deltaTime) {
+	public void update(float deltaTime) {
 		if (Gdx.input.isKeyJustPressed(Keys.I)) {
 			inventoryOpen = !inventoryOpen;
 			guiComponentMapper.get(self).actors.setVisible(inventoryOpen);
@@ -132,7 +139,7 @@ public class PlayerScript extends Script {
 	}
 	
 	@Override
-	public void onEventListened(Entity self, Entity sender, String eventName) {
+	public void onEventReceived(Entity sender, String eventName) {
 		if (eventName.contentEquals("SceneChanged")) {
 			switch (sender.getComponent(NewSceneComponent.class).sceneName) {
 				case "village":

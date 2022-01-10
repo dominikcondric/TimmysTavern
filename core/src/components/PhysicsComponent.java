@@ -2,7 +2,6 @@ package components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.utils.Disposable;
 
 public class PhysicsComponent implements Component, Disposable {
@@ -10,10 +9,10 @@ public class PhysicsComponent implements Component, Disposable {
 
 	@Override
 	public void dispose() {
-		for (Fixture f : body.getFixtureList()) {
-			body.destroyFixture(f);
-		}
+		if (body == null)
+			return;
 		
 		body.getWorld().destroyBody(body);
+		body = null;
 	}
 }

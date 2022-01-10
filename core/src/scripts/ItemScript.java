@@ -1,5 +1,6 @@
 package scripts;
 
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -15,14 +16,25 @@ import com.gdx.game.TimmysTavern;
 
 import components.EntityBits;
 import components.GuiComponent;
-import components.NewSceneComponent;
+import components.ItemComponent;
 import components.ScriptComponent;
+import components.SoundComponent;
 
-public class DoorScript extends Script {
-	private boolean openable = false;
+public class ItemScript extends Script {
+	private final int maxItems;
+	private int itemsAvailable;
+	private boolean pickable = false;
+	private float newItemTimer = 0.f;
+	private float timeToNextItemAppear;
+	private ComponentMapper<SoundComponent> soundCompMapper = ComponentMapper.getFor(SoundComponent.class);
+	private ComponentMapper<ScriptComponent> scriptCompMapper = ComponentMapper.getFor(ScriptComponent.class);
 	
-	public DoorScript(Entity self) {
+	public ItemScript(Entity self, final int maxFruits, final float timeToNextFruitGrow) {
 		super(self);
+		this.maxItems = maxFruits;
+		itemsAvailable = maxFruits;
+		this.timeToNextItemAppear = timeToNextFruitGrow;
+		
 		GuiComponent guiComp = self.getComponent(GuiComponent.class);
 		if (guiComp == null) {
 			guiComp = new GuiComponent();
@@ -31,13 +43,13 @@ public class DoorScript extends Script {
 		
 		Image borderImage = new Image(new Texture(Gdx.files.internal("InventoryItemBorder.png")));
 		borderImage.setPosition(50f, 900f);
-		borderImage.setSize(500.f, 50.f);
+		borderImage.setSize(500f, 50.f);
 		guiComp.actors.addActor(borderImage);
 		
-		Label label = new Label("Press ENTER to open the door", new LabelStyle(TimmysTavern.font, Color.WHITE));
+		Label label = new Label("Press ENTER to pick " + self.getComponent(ItemComponent.class).item.name, new LabelStyle(TimmysTavern.font, Color.WHITE));
 		label.setFontScale(2.f);
-		label.setPosition(50f, 900.f);
-		label.setSize(500.f, 50.f);
+		label.setPosition(50f, 900f);
+		label.setSize(500f, 50.f);
 		label.setAlignment(Align.center);
 		guiComp.actors.addActor(label);
 		guiComp.actors.setVisible(false);
@@ -45,17 +57,23 @@ public class DoorScript extends Script {
 	
 	@Override
 	public void update(float deltaTime) {
-		if (openable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-			ScriptComponent scriptComp = self.getComponent(ScriptComponent.class);
-			scriptComp.eventsToDispatch.add("SceneChanged");
-			self.getComponent(NewSceneComponent.class).load = true;
+		if (pickable && itemsAvailable > 0 && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
+			scriptCompMapper.get(self).eventsToDispatch.add("ItemPicked");
+			soundCompMapper.get(self).getSoundEffect("ItemPicked").shouldPlay = true;
+			--itemsAvailable;
+		}
+		
+		newItemTimer += deltaTime;
+		if (newItemTimer >= timeToNextItemAppear) {
+			itemsAvailable = Math.min(itemsAvailable + 1, maxItems);
+			newItemTimer = 0.f;
 		}
 	}
 	
 	@Override
 	public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {
 		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
-			openable = false;
+			pickable = false;
 			this.self.getComponent(GuiComponent.class).actors.setVisible(false);
 		}
 	}
@@ -63,17 +81,13 @@ public class DoorScript extends Script {
 	@Override
 	public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {
 		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
-			openable = true;
+			pickable = true;
 			this.self.getComponent(GuiComponent.class).actors.setVisible(true);
 		}
 	}
 
 	@Override
 	public void onEventResponse(Entity receiver, String eventName) {
-		if (eventName.contentEquals("SceneChanged")) {
-			self.getComponent(ScriptComponent.class).eventsToDispatch.remove(eventName);
-		}
+		scriptCompMapper.get(self).eventsToDispatch.remove("ItemPicked");
 	}
-	
-	
 }

@@ -5,9 +5,15 @@ import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Fixture;
 
 public abstract class Script {
-	public abstract void update(Entity self, float deltaTime);
+	protected final Entity self;
+	
+	public Script(Entity selfEntity) {
+		self = selfEntity;
+	}
+	
+	public abstract void update(float deltaTime);
 	public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {}
 	public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {}
-	public void onEventListened(Entity self, Entity sender, String eventName) {}
-	public void onEventReceived(Entity self, Entity receiver, String eventName) {}
+	public void onEventReceived(Entity sender, String eventName) {}
+	public void onEventResponse(Entity receiver, String eventName) {}
 }

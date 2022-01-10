@@ -21,7 +21,6 @@ public class MainMenuScreen implements Screen {
 	private Stage ui;
 	private Table menuLayout;
 	private TextButton startGameButton;
-	private TextButton resumeGameButton;
 	private TextButton exitGameButton;
 	
 	public MainMenuScreen(TimmysTavern game) {
@@ -35,13 +34,12 @@ public class MainMenuScreen implements Screen {
 		buttonBackgroundPixmap.fill();
 		TextureRegionDrawable buttonBackround = new TextureRegionDrawable(new Texture(buttonBackgroundPixmap)); 
 		TextButtonStyle buttonStyle = new TextButtonStyle();
-		buttonStyle.font = game.font;
+		buttonStyle.font = TimmysTavern.font;
 		buttonStyle.fontColor = Color.WHITE;
+		buttonStyle.overFontColor = Color.YELLOW;
 		buttonStyle.up = buttonBackround;
 		startGameButton = new TextButton("Start game", buttonStyle);
 		startGameButton.getLabel().setFontScale(2.f);
-		resumeGameButton = new TextButton("Resume game", buttonStyle);
-		resumeGameButton.getLabel().setFontScale(2.f);
 		exitGameButton = new TextButton("Exit game", buttonStyle);
 		exitGameButton.getLabel().setFontScale(2.f);
 		
@@ -53,8 +51,6 @@ public class MainMenuScreen implements Screen {
  		
 		menuLayout.row();
 		menuLayout.add(startGameButton).spaceBottom(buttonHeight / 3.f).width(ui.getWidth() / 2).height(buttonHeight * 2f);
-		menuLayout.row();
-		menuLayout.add(resumeGameButton).spaceBottom(buttonHeight / 3.f).width(ui.getWidth() / 2).height(buttonHeight * 2f);
 		menuLayout.row();
 		menuLayout.add(exitGameButton).spaceBottom(buttonHeight / 3.f).width(ui.getWidth() / 2).height(buttonHeight * 2f);
 		buttonBackgroundPixmap.dispose();		
@@ -79,8 +75,7 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
-
+		ui.getViewport().setScreenSize(width, height);
 	}
 
 	@Override

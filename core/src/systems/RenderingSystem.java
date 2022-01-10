@@ -7,12 +7,9 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
@@ -20,7 +17,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import components.AnimationComponent;
 import components.CameraComponent;
-import components.EntityBits;
 import components.MapComponent;
 import components.SpriteComponent;
 
@@ -35,9 +31,7 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 	private ComponentMapper<CameraComponent> camCompMapper = ComponentMapper.getFor(CameraComponent.class);
 	private SpriteBatch batch;
 	private OrthogonalTiledMapRenderer mapRenderer;
-	private Box2DDebugRenderer b2DRenderer;
-	private Stage ui; 
-	public boolean drawDebugPhysics = false;
+	public Stage ui; 
 	
 	public RenderingSystem(SpriteBatch batch, int priority) {
 		super(priority);
@@ -45,17 +39,12 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 		
 		ui = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), batch);
 		Gdx.input.setInputProcessor(ui);
-		b2DRenderer = new Box2DDebugRenderer();
 		mapRenderer = new OrthogonalTiledMapRenderer(null, 1f / 32f, batch);
 	}
 	
 	@Override
 	public void update(float deltaTime) {
 		Engine engine = getEngine();
-		
-		if (Gdx.input.isKeyJustPressed(Keys.P)) {
-			drawDebugPhysics = !drawDebugPhysics;
-		}
 		
 		OrthographicCamera cam = null; 
 		for (final Entity e : engine.getEntitiesFor(camComponentFamily)) {
@@ -71,14 +60,11 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 			spriteCompMapper.get(e).setSprite(animationComp.getActiveSprite(deltaTime), false);
 		}
 		
-		Vector2 playerPosition = null;
-		Vector2 mapSize = new Vector2(100f, 100f);
 		batch.begin();
 		for (Entity e : engine.getEntitiesFor(mapComponentFamily)) {
 			MapComponent mapComp = mapCompMapper.get(e);
 			mapRenderer.setMap(mapComp.map);
 			mapRenderer.setView(cam);
-			mapSize = mapComp.getMapSize();
 			for (int i = 0; i < mapComp.getLastBackgroundLayerToRenderIndex(); ++i) {
 				mapRenderer.renderTileLayer(mapComp.getTileLayers().get(i));
 			}
@@ -87,43 +73,30 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 		for (Entity e : engine.getEntitiesFor(spriteComponentsFamily)) {
 			SpriteComponent spriteComp = spriteCompMapper.get(e);
 			spriteComp.draw(batch);
-			if ((e.flags & EntityBits.PLAYER_BIT) != 0) {
-				playerPosition = spriteComp.position;
-			}
 		}
 		
 		for (Entity e : engine.getEntitiesFor(mapComponentFamily)) {
 			MapComponent mapComp = mapCompMapper.get(e);
 			mapRenderer.setMap(mapComp.map);
-			mapSize = mapComp.getMapSize();
 			mapRenderer.setView(cam);
 			for (int i = mapComp.getLastBackgroundLayerToRenderIndex(); i < mapComp.getTileLayers().size; ++i) {
 				mapRenderer.renderTileLayer(mapComp.getTileLayers().get(i));
 			}
 		}
 		
-		updateCamera(playerPosition, mapSize.scl(mapRenderer.getUnitScale()));
 		batch.setProjectionMatrix(cam.combined);
 		batch.end();
 		
 		ui.act(deltaTime);
 		ui.draw();
-		
-		if (drawDebugPhysics)
-			engine.getSystem(PhysicsSystem.class).drawDebugPhysics(b2DRenderer, cam.combined);
 	}
 	
 	public void addGuiElement(Actor actor) {
 		ui.addActor(actor);
 	}
 	
-	public void updateCamera(Vector2 playerPosition, Vector2 mapSize) {
-		
-	}
-
 	@Override
 	public void dispose() {
-		b2DRenderer.dispose();
 		mapRenderer.dispose();
 		ui.dispose();
 	}

@@ -17,6 +17,7 @@ public class GuiComponent implements Component, Disposable {
 	@Override
 	public void dispose() {
 		groupLoop(actors);
+		actors.remove();
 	}
 	
 	private void groupLoop(Group group) {
@@ -26,6 +27,7 @@ public class GuiComponent implements Component, Disposable {
 			} else if (a instanceof Group) {
 				groupLoop((Group)a);
 			}
+			a.remove();
 		}
 	}
 }
