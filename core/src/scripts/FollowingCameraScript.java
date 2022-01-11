@@ -33,7 +33,7 @@ public class FollowingCameraScript extends Script {
 			
 			float windowAspectRatio = (float)Gdx.graphics.getHeight() / Gdx.graphics.getWidth();
 			camera.viewportWidth = Math.max(20.f, xLimits.y / 3f);
-			camera.viewportHeight = Math.max(20.f * windowAspectRatio, yLimits.y / 3f * windowAspectRatio);
+			camera.viewportHeight = Math.max(20.f * windowAspectRatio, xLimits.y / 3f * windowAspectRatio);
 			
 			if (playerPosition.x - camera.viewportWidth / 2f < xLimits.x) {
 				camera.position.x = camera.viewportWidth / 2f;
@@ -60,7 +60,7 @@ public class FollowingCameraScript extends Script {
 					break;
 				case "village":
 					xLimits.y = 100.f;
-					yLimits.y = 100.f;
+					yLimits.y = 75.f;
 					break;
 			}
 		}

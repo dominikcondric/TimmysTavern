@@ -144,7 +144,7 @@ public class PlayerScript extends Script {
 		if (eventName.contentEquals("SceneChanged")) {
 			switch (sender.getComponent(NewSceneComponent.class).sceneName) {
 				case "village":
-					physicsComponentMapper.get(self).body.setTransform(new Vector2(48.f, 8.f),  0.f);
+					physicsComponentMapper.get(self).body.setTransform(new Vector2(48.f, 28.f),  0.f);
 					animationComponentMapper.get(self).setActiveAnimation("IdleDown", false);
 					break;
 				

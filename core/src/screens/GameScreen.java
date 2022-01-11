@@ -137,7 +137,7 @@ public class GameScreen implements Screen {
 		Entity player = new Entity();
 		player.flags |= EntityBits.NO_DESTROY_BIT;
 		float playerWHRation = 20f / 28f;
-		Vector2 playerPosition = new Vector2(3.f, 12.f);
+		Vector2 playerPosition = new Vector2(48.f, 28.f);
 		Vector2 playerSize = new Vector2(2 * playerWHRation, 2f);
 		
 		// Player sprite/animation components
@@ -195,8 +195,6 @@ public class GameScreen implements Screen {
 		playerPhysicsComp.body.createFixture(fixtureDef).setUserData(playerScriptComponent.script);
 		shape.dispose();
 		
-		playerPhysicsComp.body.setTransform(new Vector2(48.f, 8.f), 0f);
-		
 		GuiComponent playerInventory = new GuiComponent();
 		playerInventory.actors.setVisible(false);
 		Pixmap backgroundBlack = new Pixmap(1, 1, Format.RGBA8888);
@@ -250,7 +248,7 @@ public class GameScreen implements Screen {
 		CameraComponent camComp = new CameraComponent(30.f * screenAspectRatio, 30.f);
 		camComp.camera.position.set(playerPosition, 0.f);
 		camComp.xLimits = new Vector2(0.f, 100f);
-		camComp.yLimits = new Vector2(0.f, 100f);
+		camComp.yLimits = new Vector2(0.f, 75f);
 		cameraEntity.add(camComp);
 		ScriptComponent camScriptComp = (ScriptComponent)cameraEntity.addAndReturn(new ScriptComponent(new FollowingCameraScript(cameraEntity)));
 		camScriptComp.eventsToListen.add("SceneChanged");
@@ -356,7 +354,6 @@ public class GameScreen implements Screen {
 			polyShape.setAsBox(rect.getWidth() / 2f, rect.getHeight() / 2f);
 			fixtureDef = new FixtureDef();
 			fixtureDef.shape = polyShape;
-			fixtureDef.isSensor = true;
 			fixtureDef.filter.categoryBits = EntityBits.INTERACTABLE_B2D_BIT;
 			fixtureDef.filter.groupIndex = -EntityBits.STATIC_SCENERY_B2D_GROUP;
 			fixtureDef.filter.maskBits = EntityBits.PLAYER_B2D_BIT;
@@ -368,6 +365,7 @@ public class GameScreen implements Screen {
 				{
 					interactable.add(new ScriptComponent(new DoorScript(interactable)));
 					NewSceneComponent newSceneComp = (NewSceneComponent)interactable.addAndReturn(new NewSceneComponent("tavern"));
+					fixtureDef.isSensor = true;
 					newSceneComps.add(newSceneComp);
 					break;
 				}
@@ -376,6 +374,7 @@ public class GameScreen implements Screen {
 					interactable.add(new ItemComponent(Item.APPLE));
 					interactable.add(new ScriptComponent(new ItemScript(interactable, 20, 60.f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = true;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
 					interactable.add(itemSoundComp);
 					break;
@@ -385,6 +384,7 @@ public class GameScreen implements Screen {
 					interactable.add(new ItemComponent(Item.CRANBERRY));
 					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = true;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
 					interactable.add(itemSoundComp);
 					break;
@@ -394,12 +394,104 @@ public class GameScreen implements Screen {
 					interactable.add(new ItemComponent(Item.BLUEBERRY));
 					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = true;
+					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					break;
+				}
+				case "tomato":
+				{
+					interactable.add(new ItemComponent(Item.TOMATO));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, 20, 60.f)));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = false;
+					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					break;
+				}
+				case "tuna":
+				{
+					interactable.add(new ItemComponent(Item.TUNA));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = true;
+					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					break;
+				}
+				case "eggplant":
+				{
+					interactable.add(new ItemComponent(Item.EGGPLANT));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = true;
+					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					break;
+				}
+				case "pepper":
+				{
+					interactable.add(new ItemComponent(Item.PEPPER));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, 20, 60.f)));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = false;
+					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					break;
+				}
+				case "broccoli":
+				{
+					interactable.add(new ItemComponent(Item.BROCCOLI));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = false;
+					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					break;
+				}
+				case "carrot":
+				{
+					interactable.add(new ItemComponent(Item.CARROT));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = false;
+					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					break;
+				}
+				case "trout":
+				{
+					interactable.add(new ItemComponent(Item.TROUT));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = true;
+					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					break;
+				}
+				case "corn":
+				{
+					interactable.add(new ItemComponent(Item.CORN));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = false;
+					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+					interactable.add(itemSoundComp);
+					break;
+				}
+				case "potato":
+				{
+					interactable.add(new ItemComponent(Item.POTATO));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					SoundComponent itemSoundComp = new SoundComponent(); 
+					fixtureDef.isSensor = false;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
 					interactable.add(itemSoundComp);
 					break;
 				}
 			}
 			
+			System.out.println(object.getName());
 			body.createFixture(fixtureDef).setUserData(interactable.getComponent(ScriptComponent.class).script);
 			polyShape.dispose();
 			villageEntities.add(interactable);

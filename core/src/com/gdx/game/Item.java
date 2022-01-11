@@ -21,14 +21,19 @@ public enum Item {
 	LAMB("lamb", "Janjetina", "Pixel_Mart\\meat1_p.png", 0, 0, 32, 32),
 	BEEF("govedina", "Govedina", "Pixel_Mart\\meat2.png", 0, 0, 32, 32),
 	CHICKEN("chicken", "Piletina", "Pixel_Mart\\meat3.png", 0, 0, 32, 32),
-	FISH("fish", "Riba", "Pixel_Mart\\fish.png", 0, 0, 32, 32),
+	TUNA("fish", "Tuna", "Pixel_Mart\\fish.png", 0, 0, 32, 32),
+	TROUT("trout", "Pastrva", "Pixel_Mart\\fish_p.png", 0, 0, 32, 32),
 	KETCHUP("ketchup", "Kecap", "Pixel_Mart\\ketchup.png", 0, 0, 32, 32),
 	MAYONNAISE("mayonnaise", "Majoneza", "Pixel_Mart\\mustard.png", 0, 0, 32, 32),
 	SALT("salt", "Sol", "Pixel_Mart\\salt.png", 0, 0, 32, 32),
 	CHEESE("cheese", "Sir", "Pixel_Mart\\white_cheese.png", 0, 0, 32, 32),
 	SALAD("salad", "Salata", "farm assets\\Fruits and Vegetables\\Lettuce.png", 0, 0, 32, 32),
 	TOMATO("tomato", "Pasirana rajcica", "farm assets\\Fruits and Vegetables\\Tomato.png", 0, 0, 32, 32),
-	POTATO("potato", "Krumpir", "farm assets\\Fruits and Vegetables\\Potato.png", 0, 0, 32, 32);
+	POTATO("potato", "Krumpir", "farm assets\\Fruits and Vegetables\\Potato.png", 0, 0, 32, 32),
+	CORN("corn", "Kukuruz", "farm assets\\Fruits and Vegetables\\Corn.png", 0, 0, 32, 32),
+	EGGPLANT("eggplant", "Patlidzan", "farm assets\\Fruits and Vegetables\\Aubergine.png", 0, 0, 32, 32),
+	PEPPER("pepper", "Paprika", "farm assets\\Fruits and Vegetables\\Pepper Red.png", 0, 0, 32, 32),
+	BROCCOLI("broccoli", "Brokula", "farm assets\\Fruits and Vegetables\\Broccoli.png", 0, 0, 32, 32);
 	
 	public final String name;
 	public final String guiName;
