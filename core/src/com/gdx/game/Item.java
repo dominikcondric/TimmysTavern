@@ -5,14 +5,21 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public enum Item {
-	CRANBERRY("cranberry", 0.01f, "farm assets\\Fruits and Vegetables\\Cranberries.png", 0, 0, 32, 32),
-	BLUEBERRY("blueberry", 0.01f, "farm assets\\Fruits and Vegetables\\Blueberries.png", 0, 0, 32, 32),
-	APPLE("apple", 0.1f, "farm assets\\Fruits and Vegetables\\Apple Red.png", 0, 0, 32, 32),
-	BREAD("bread", 0.8f, "Ghostpixxells_pixelfood\\07_bread.png", 0, 0, 32, 32),
-	MUSHROOM("mushroom", 0.05f, "farm assets\\Fruits and Vegetables\\Mushroom White.png", 0, 0, 32, 32);
+	CRANBERRY("cranberry", "Brusnica", "farm assets\\Fruits and Vegetables\\Cranberries.png", 0, 0, 32, 32),
+	BLUEBERRY("blueberry", "Borovnica", "farm assets\\Fruits and Vegetables\\Blueberries.png", 0, 0, 32, 32),
+	APPLE("apple", "Jabuka", "farm assets\\Fruits and Vegetables\\Apple Red.png", 0, 0, 32, 32),
+	BREAD("bread", "Kruh", "Ghostpixxells_pixelfood\\07_bread.png", 0, 0, 32, 32),
+	MUSHROOM("mushroom", "Gljive", "farm assets\\Fruits and Vegetables\\Mushroom White.png", 0, 0, 32, 32),
+	SUGAR("sugar", "Secer", "Pixel_Mart\\sugar.png", 0, 0, 32, 32),
+	EGG("egg", "Jaja", "Pixel_Mart\\egg_brown", 0, 0, 32, 32),
+	FLOUR("flour", "Brasno", "Pixel_Mart\\flour.png", 0, 0, 32, 32),
+	CARROT("carrot", "Mrkva", "farm assets\\Fruits and Vegetables\\Carrot.png", 0, 0, 32, 32),
+	OIL("oil", "Ulje", "Pixel_Mart\\olive_oil.png", 0, 0, 32, 32),
+	WATER("water", "Voda", "Pixel_Mart\\water.png", 0, 0, 32, 32),
+	BAKING_POWDER("bakingPowder", "Prasak za pecivo", "Pixel_Mart\\baking_powder.png", 0, 0, 32, 32);
 	
 	public final String name;
-	public final float weight; // Weight in kilograms
+	public final String guiName;
 	public final String texturePath;
 	public final int textureX;
 	public final int textureY;
@@ -20,9 +27,9 @@ public enum Item {
 	public final int textureHeight;
 	public static final String itemPickingSoundFile = "RPGsounds_Kenney\\OGG\\handleSmallLeather2.ogg";
 	
-	private Item(String itemName, float itemWeight, String texPath, int x, int y, int w, int h) {
+	private Item(String itemName, String guiName, String texPath, int x, int y, int w, int h) {
 		this.name = itemName;
-		this.weight = itemWeight;
+		this.guiName = guiName;
 		texturePath = texPath;
 		textureX = x;
 		textureY = y;

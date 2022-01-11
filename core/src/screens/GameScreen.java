@@ -485,45 +485,14 @@ public class GameScreen implements Screen {
 				case "Cooker":
 				{
 					interactable.flags |= EntityBits.NO_DESTROY_BIT;
-					interactable.add(new ScriptComponent(new CookerScript(interactable)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
 					interactable.add(itemSoundComp);
+					interactable.add(new ScriptComponent(new CookerScript(interactable)));
 					body.createFixture(fixtureDef).setUserData(interactable.getComponent(ScriptComponent.class).script);
-//					GuiComponent guiComponent = new GuiComponent();
-//					final float inventorySlotSize = 1920.f / 30.f;
-//					final float firstImageX = inventorySlotSize * 6;
-//					final float firstImageY = 1080.f - inventorySlotSize * 6;
-//					Texture borderTexture = new Texture(Gdx.files.internal("InventoryItemBorder.png"));
-//					LabelStyle labelStyle = new LabelStyle(TimmysTavern.font, Color.WHITE);
-//					
-//					for (int i = 4; i >= 0; --i) {
-//						for (int j = 0; j < 5; ++j) {
-//							Image border = new Image(borderTexture);
-//							border.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
-//							border.setSize(inventorySlotSize, inventorySlotSize);
-//							Group inventoryItemGroup = new Group();
-//							Label label = new Label("", labelStyle);
-//							label.setFontScale(2f);
-//							label.setPosition(firstImageX + j * inventorySlotSize + inventorySlotSize * (2f/3f), firstImageY + i * inventorySlotSize + inventorySlotSize * (1f/4f));
-//							label.setSize(10f, 10f);
-//							label.setVisible(false);
-//							Image emptyImage = new Image();
-//							emptyImage.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
-//							emptyImage.setSize(inventorySlotSize, inventorySlotSize);
-//							inventoryItemGroup.addActor(border);
-//							inventoryItemGroup.addActor(new Image());
-//							inventoryItemGroup.addActor(label);
-//							guiComponent.actors.addActor(inventoryItemGroup);
-//						}
-//					}
-//					
-//					self.add(guiComponent);
-//					break;
+					break;
 				}
-				
 			}
-			
 			
 			polyShape.dispose();
 			tavernEntities.add(interactable);
