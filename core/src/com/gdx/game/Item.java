@@ -22,7 +22,7 @@ public enum Item {
 	BEEF("govedina", "Govedina", "Pixel_Mart\\meat2.png", 0, 0, 32, 32),
 	CHICKEN("chicken", "Piletina", "Pixel_Mart\\meat3.png", 0, 0, 32, 32),
 	TUNA("fish", "Tuna", "Pixel_Mart\\fish.png", 0, 0, 32, 32),
-	TROUT("trout", "Pastrva", "Pixel_Mart\\fish_p.png", 0, 0, 32, 32),
+	TROUT("trout", "Pastrva", "Pixel_Mart\\salmon.png", 0, 0, 32, 32),
 	KETCHUP("ketchup", "Kecap", "Pixel_Mart\\ketchup.png", 0, 0, 32, 32),
 	MAYONNAISE("mayonnaise", "Majoneza", "Pixel_Mart\\mustard.png", 0, 0, 32, 32),
 	SALT("salt", "Sol", "Pixel_Mart\\salt.png", 0, 0, 32, 32),
@@ -33,7 +33,13 @@ public enum Item {
 	CORN("corn", "Kukuruz", "farm assets\\Fruits and Vegetables\\Corn.png", 0, 0, 32, 32),
 	EGGPLANT("eggplant", "Patlidzan", "farm assets\\Fruits and Vegetables\\Aubergine.png", 0, 0, 32, 32),
 	PEPPER("pepper", "Paprika", "farm assets\\Fruits and Vegetables\\Pepper Red.png", 0, 0, 32, 32),
-	BROCCOLI("broccoli", "Brokula", "farm assets\\Fruits and Vegetables\\Broccoli.png", 0, 0, 32, 32);
+	BROCCOLI("broccoli", "Brokula", "farm assets\\Fruits and Vegetables\\Broccoli.png", 0, 0, 32, 32),
+	PASTA("pasta", "Pasta", "Pixel_Mart\\white_cheese.png\\pencil_box.png", 0, 0, 32, 32),
+	WINE("wine", "Vino", "Pixel_Mart\\white_cheese.png\\wine_red.png", 0, 0, 32, 32),
+	ONION("onion", "Luk", "farm assets\\Fruits and Vegetables\\Onion White.png", 0, 0, 32, 32),
+	GARLIC("garlic", "Cesnjak", "farm assets\\Fruits and Vegetables\\Garlic.png", 0, 0, 32, 32),
+	HAM("ham", "Sunka", "Pixel_Mart\\white_cheese.png\\sausage_p.png", 0, 0, 32, 32),
+	CHOCOLATE("chocolate", "Cokolada", "Ghostpixxells_pixelfood\\26_chocolate.png", 0, 0, 32, 32);
 	
 	public final String name;
 	public final String guiName;

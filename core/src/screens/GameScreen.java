@@ -491,7 +491,6 @@ public class GameScreen implements Screen {
 				}
 			}
 			
-			System.out.println(object.getName());
 			body.createFixture(fixtureDef).setUserData(interactable.getComponent(ScriptComponent.class).script);
 			polyShape.dispose();
 			villageEntities.add(interactable);
