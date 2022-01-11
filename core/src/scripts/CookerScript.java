@@ -3,10 +3,10 @@ package scripts;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -14,13 +14,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
@@ -30,26 +24,29 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.gdx.game.Item;
 import com.gdx.game.TimmysTavern;
 
 import components.EntityBits;
 import components.GuiComponent;
+import components.ScriptComponent;
+import components.SoundComponent;
+import scripts.PlayerScript.InventorySlot;
 
 public class CookerScript extends Script implements Disposable {
+	private ComponentMapper<ScriptComponent> scriptCompMapper = ComponentMapper.getFor(ScriptComponent.class);
 	private ArrayList<Recipe> meals;
 	private Table recipesList;
 	private Table recipeIngredientList;
 	private ScrollPane recipeListScrollPane;
 	private ScrollPane recipeIngredientListScrollPane;
-	private HashMap<String, Ingredient> itemsOnCooker;
-	private Recipe activeRecipe;
-	private int completedItems = 0;
+	Recipe activeRecipe;
 	private boolean cookable = false;
 	private TextButtonStyle textButtonStyle;
-	private LabelStyle labelStyle;
+	private LabelStyle whiteLabelStyle;
+	private LabelStyle greenLabelStyle;
+	private LabelStyle redLabelStyle;
 	private TextButton cookButton;
 	private TextButton goBackButton;
 	private TextButtonStyle cookButtonStyle;
@@ -66,46 +63,56 @@ public class CookerScript extends Script implements Disposable {
 	
 	class Recipe {
 		String name;
-		ArrayList<Ingredient> Ingredients;
+		ArrayList<Ingredient> ingredients;
 		TextButton button;
 	}
 	
 	public CookerScript(Entity selfEntity) {
 		super(selfEntity);
 		meals = new ArrayList<Recipe>();
-		itemsOnCooker = new HashMap<String, Ingredient>();
-		labelStyle = new LabelStyle(TimmysTavern.font, Color.WHITE);
+		whiteLabelStyle = new LabelStyle(TimmysTavern.font, Color.WHITE);
+		greenLabelStyle = new LabelStyle(TimmysTavern.font, Color.GREEN);
+		redLabelStyle = new LabelStyle(TimmysTavern.font, Color.RED);
 		
 		Recipe recipe = new Recipe();
 		recipe.name = "Pita od jabuka";
 		meals.add(recipe);
-		recipe.Ingredients = new ArrayList<>();
-		recipe.Ingredients.add(new Ingredient(Item.APPLE, 10));
-		recipe.Ingredients.add(new Ingredient(Item.FLOUR, 20));
-		recipe.Ingredients.add(new Ingredient(Item.SUGAR, 3));
-		recipe.Ingredients.add(new Ingredient(Item.OIL, 5));
-		recipe.Ingredients.add(new Ingredient(Item.WATER, 10));
+		recipe.ingredients = new ArrayList<>(5);
+		recipe.ingredients.add(new Ingredient(Item.APPLE, 10));
+		recipe.ingredients.add(new Ingredient(Item.FLOUR, 20));
+		recipe.ingredients.add(new Ingredient(Item.SUGAR, 3));
+		recipe.ingredients.add(new Ingredient(Item.OIL, 5));
+		recipe.ingredients.add(new Ingredient(Item.WATER, 10));
 		
 		recipe = new Recipe();
 		recipe.name = "Kolac od borovnica";
 		meals.add(recipe);
-		recipe.Ingredients = new ArrayList<>();
-		recipe.Ingredients.add(new Ingredient(Item.BLUEBERRY, 40));
-		recipe.Ingredients.add(new Ingredient(Item.FLOUR, 20));
-		recipe.Ingredients.add(new Ingredient(Item.WATER, 5));
-		recipe.Ingredients.add(new Ingredient(Item.OIL, 10));
-		recipe.Ingredients.add(new Ingredient(Item.BAKING_POWDER, 2));
-//		
-//		recipe = new Recipe();
-//		recipe.name = "Hamburger";
-//		meals.put(recipe.name, recipe);
-//		recipe.Ingredients = new HashMap<>();
-//		recipe.Ingredients.put("bread", new Ingredient("bread", 40));
-//		recipe.Ingredients.put("meat", new Ingredient("meat", 20));
-//		recipe.Ingredients.put("salad", new Ingredient("salad", 5));
-//		recipe.Ingredients.put("ketchup", new Ingredient("ketchup", 10));
-//		recipe.Ingredients.put("mayonnaise", new Ingredient("mayonnaise", 2));
+		recipe.ingredients = new ArrayList<>(5);
+		recipe.ingredients.add(new Ingredient(Item.BLUEBERRY, 40));
+		recipe.ingredients.add(new Ingredient(Item.FLOUR, 20));
+		recipe.ingredients.add(new Ingredient(Item.WATER, 5));
+		recipe.ingredients.add(new Ingredient(Item.OIL, 10));
+		recipe.ingredients.add(new Ingredient(Item.BAKING_POWDER, 2));
 		
+		recipe = new Recipe();
+		recipe.name = "Hamburger";
+		meals.add(recipe);
+		recipe.ingredients = new ArrayList<>(5);
+		recipe.ingredients.add(new Ingredient(Item.BREAD, 40));
+		recipe.ingredients.add(new Ingredient(Item.BEEF, 20));
+		recipe.ingredients.add(new Ingredient(Item.SALAD, 5));
+		recipe.ingredients.add(new Ingredient(Item.KETCHUP, 1));
+		recipe.ingredients.add(new Ingredient(Item.MAYONNAISE, 1));
+		recipe = new Recipe();
+		recipe.name = "Govedji gulas";
+		meals.add(recipe);
+		recipe.ingredients = new ArrayList<>(5);
+		recipe.ingredients.add(new Ingredient(Item.BEEF, 2));
+		recipe.ingredients.add(new Ingredient(Item.SALT, 2));
+		recipe.ingredients.add(new Ingredient(Item.WATER, 5));
+		recipe.ingredients.add(new Ingredient(Item.TOMATO, 10));
+		recipe.ingredients.add(new Ingredient(Item.OIL, 1));
+		recipe.ingredients.add(new Ingredient(Item.POTATO, 3));
 		
 		final float inventorySlotSize = Gdx.graphics.getWidth() / 30.f;
 		final float startX = inventorySlotSize * 2;
@@ -119,7 +126,8 @@ public class CookerScript extends Script implements Disposable {
 		textButtonStyle = new TextButtonStyle();
 		textButtonStyle.font = TimmysTavern.font;
 		textButtonStyle.fontColor = Color.WHITE;
-		textButtonStyle.overFontColor = Color.BLACK;
+		textButtonStyle.overFontColor = Color.YELLOW;
+		textButtonStyle.downFontColor = Color.GOLD;
 		
 		cookButtonStyle = new TextButtonStyle(textButtonStyle);
 		Pixmap grayBackground = new Pixmap(1, 1, Format.RGB888);
@@ -128,7 +136,6 @@ public class CookerScript extends Script implements Disposable {
 		cookButtonStyle.up = new TextureRegionDrawable(new Texture(grayBackground));
 		cookButtonStyle.fontColor = Color.BLACK;
 		cookButtonStyle.overFontColor = Color.GOLD;
-		grayBackground.dispose();
 		
 		goBackButton = new TextButton("Back", cookButtonStyle);
 		goBackButton.align(Align.center);
@@ -141,7 +148,7 @@ public class CookerScript extends Script implements Disposable {
 				recipeListScrollPane.setVisible(true);
 				recipeIngredientListScrollPane.setVisible(false);
 				activeRecipe = null;
-				
+				cookable = false;
 			}
 			
 		});
@@ -149,6 +156,15 @@ public class CookerScript extends Script implements Disposable {
 		cookButton = new TextButton("Kuhaj!", cookButtonStyle);
 		cookButton.align(Align.center);
 		cookButton.getLabel().setFontScale(2.f);
+		cookButton.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				if (cookable) {
+					scriptCompMapper.get(self).eventsToDispatch.add("CookingStarted");
+				}
+			}
+		});
+		grayBackground.dispose();
 		
 		for (Recipe r : meals) {
 			recipesList.row();
@@ -175,6 +191,8 @@ public class CookerScript extends Script implements Disposable {
 		guiComponent.actors.addActor(recipeListScrollPane);
 		guiComponent.actors.addActor(recipeIngredientListScrollPane);
 		self.add(guiComponent);
+		
+		((SoundComponent)self.addAndReturn(new SoundComponent())).addSound("mealComplete", Gdx.files.internal("jingleSounds_Kenney\\OGG\\jingles_SAX\\jingles_SAX16.ogg"), false, false);
 	}
 	
 	private void createIngredientsList() {
@@ -183,14 +201,14 @@ public class CookerScript extends Script implements Disposable {
 		recipeNameLabel.setFontScale(2.f);
 		recipeIngredientList.add(recipeNameLabel).expandX().colspan(2);
 		
-		for (Ingredient i : activeRecipe.Ingredients) {
+		for (Ingredient i : activeRecipe.ingredients) {
 			recipeIngredientList.row();
-			Label IngredientLabel = new Label(i.item.guiName, labelStyle);
+			Label IngredientLabel = new Label(i.item.guiName, whiteLabelStyle);
 			IngredientLabel.setFontScale(1.5f);
 			IngredientLabel.setAlignment(Align.center);
 			recipeIngredientList.add(IngredientLabel).width(recipeIngredientListScrollPane.getWidth() * 0.5f);
 			IngredientLabel.setWrap(true);
-			Label counter = new Label("0", labelStyle);
+			Label counter = new Label("0", redLabelStyle);
 			counter.setFontScale(1.5f);
 			counter.setAlignment(Align.center);
 			recipeIngredientList.add(counter).width(recipeIngredientListScrollPane.getWidth() / 2.f);
@@ -199,6 +217,7 @@ public class CookerScript extends Script implements Disposable {
 		recipeIngredientList.row();
 		recipeIngredientList.add(goBackButton).maxWidth(recipeIngredientList.getWidth() / 4.f);
 		recipeIngredientList.add(cookButton).maxWidth(recipeIngredientList.getWidth() / 4.f);
+		scriptCompMapper.get(self).eventsToDispatch.add("StartItemChecking");
 	}
 
 	@Override
@@ -215,16 +234,31 @@ public class CookerScript extends Script implements Disposable {
 			}
 		}
 	}
-
-	@Override
-	public void onEventReceived(Entity sender, String eventName) {
-		if (eventName.contentEquals("TakeItems")) {
-			if (activeRecipe == null || cookable)
-				return;
+	
+	private void checkCurrentIngredients(HashMap<String, InventorySlot> playerInventory) {
+		int completedIngredients = 0;
+		int counter = 0;
+		for (Ingredient i : activeRecipe.ingredients) {
+			if (!playerInventory.containsKey(i.item.name)) {
+				continue;
+			}
 			
-			if (completedItems == activeRecipe.Ingredients.size())
-				cookable = true;
-		} 
+			int playerIngredientAmount = playerInventory.get(i.item.name).itemCount;  
+			Label label = (Label)recipeIngredientList.getChildren().get(2 + counter * 2);
+			 if (playerIngredientAmount >= i.amount) {
+				 label.setText(Math.min(playerIngredientAmount, i.amount));
+				 label.setStyle(greenLabelStyle);
+				 ++completedIngredients;
+			 } else {
+				 label.setText(playerIngredientAmount);
+				 label.setStyle(redLabelStyle);
+			 }
+			 
+			 counter++;
+		}
+		
+		if (completedIngredients == activeRecipe.ingredients.size())
+			cookable = true;
 	}
 
 	@Override
@@ -234,6 +268,7 @@ public class CookerScript extends Script implements Disposable {
 				recipeListScrollPane.setVisible(true);
 			} else {
 				recipeIngredientListScrollPane.setVisible(true);
+				checkCurrentIngredients(((PlayerScript)other.getUserData()).inventory);
 			}
 		}
 	}
@@ -246,6 +281,22 @@ public class CookerScript extends Script implements Disposable {
 			} else {
 				recipeIngredientListScrollPane.setVisible(false);
 			}
+		}
+	}
+	
+	@Override
+	public void onEventResponse(Entity receiver, String eventName) {
+		if (eventName == "StartItemChecking") {
+			scriptCompMapper.get(self).eventsToDispatch.remove(eventName);
+			checkCurrentIngredients(((PlayerScript)receiver.getComponent(ScriptComponent.class).script).inventory);
+		} else if (eventName == "CookingStarted") {
+			scriptCompMapper.get(self).eventsToDispatch.remove(eventName);
+			activeRecipe = null;
+			cookable = false;
+			recipeIngredientList.clear();
+			recipeListScrollPane.setVisible(true);
+			recipeIngredientListScrollPane.setVisible(false);
+			self.getComponent(SoundComponent.class).getSoundEffect("mealComplete").shouldPlay = true;
 		}
 	}
 

@@ -14,9 +14,21 @@ public enum Item {
 	EGG("egg", "Jaja", "Pixel_Mart\\egg_brown", 0, 0, 32, 32),
 	FLOUR("flour", "Brasno", "Pixel_Mart\\flour.png", 0, 0, 32, 32),
 	CARROT("carrot", "Mrkva", "farm assets\\Fruits and Vegetables\\Carrot.png", 0, 0, 32, 32),
-	OIL("oil", "Ulje", "Pixel_Mart\\olive_oil.png", 0, 0, 32, 32),
+	OIL("oil", "Ulje", "Pixel_Mart\\cooking_oil.png", 0, 0, 32, 32),
 	WATER("water", "Voda", "Pixel_Mart\\water.png", 0, 0, 32, 32),
-	BAKING_POWDER("bakingPowder", "Prasak za pecivo", "Pixel_Mart\\baking_powder.png", 0, 0, 32, 32);
+	BAKING_POWDER("bakingPowder", "Prasak za pecivo", "Pixel_Mart\\baking_powder.png", 0, 0, 32, 32),
+	PORK("meat", "Svinjetina", "Pixel_Mart\\meat1.png", 0, 0, 32, 32),
+	LAMB("lamb", "Janjetina", "Pixel_Mart\\meat1_p.png", 0, 0, 32, 32),
+	BEEF("govedina", "Govedina", "Pixel_Mart\\meat2.png", 0, 0, 32, 32),
+	CHICKEN("chicken", "Piletina", "Pixel_Mart\\meat3.png", 0, 0, 32, 32),
+	FISH("fish", "Riba", "Pixel_Mart\\fish.png", 0, 0, 32, 32),
+	KETCHUP("ketchup", "Kecap", "Pixel_Mart\\ketchup.png", 0, 0, 32, 32),
+	MAYONNAISE("mayonnaise", "Majoneza", "Pixel_Mart\\mustard.png", 0, 0, 32, 32),
+	SALT("salt", "Sol", "Pixel_Mart\\salt.png", 0, 0, 32, 32),
+	CHEESE("cheese", "Sir", "Pixel_Mart\\white_cheese.png", 0, 0, 32, 32),
+	SALAD("salad", "Salata", "farm assets\\Fruits and Vegetables\\Lettuce.png", 0, 0, 32, 32),
+	TOMATO("tomato", "Pasirana rajcica", "farm assets\\Fruits and Vegetables\\Tomato.png", 0, 0, 32, 32),
+	POTATO("potato", "Krumpir", "farm assets\\Fruits and Vegetables\\Potato.png", 0, 0, 32, 32);
 	
 	public final String name;
 	public final String guiName;

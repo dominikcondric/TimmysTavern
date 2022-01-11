@@ -1,6 +1,6 @@
 package scripts;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
@@ -19,9 +19,21 @@ import components.GuiComponent;
 import components.ItemComponent;
 import components.NewSceneComponent;
 import components.PhysicsComponent;
+import components.ScriptComponent;
 import components.SoundComponent;
+import scripts.CookerScript.Ingredient;
+import scripts.CookerScript.Recipe;
 
 public class PlayerScript extends Script {
+	private int lastMovingDirection = Keys.DOWN;
+	private ComponentMapper<PhysicsComponent> physicsComponentMapper = ComponentMapper.getFor(PhysicsComponent.class);
+	private ComponentMapper<AnimationComponent> animationComponentMapper = ComponentMapper.getFor(AnimationComponent.class);
+	private ComponentMapper<ItemComponent> itemComponentMapper = ComponentMapper.getFor(ItemComponent.class);
+	private ComponentMapper<GuiComponent> guiComponentMapper = ComponentMapper.getFor(GuiComponent.class);
+	private ComponentMapper<SoundComponent> soundComponentMapper = ComponentMapper.getFor(SoundComponent.class);
+	private ComponentMapper<ScriptComponent> scriptComponentMapper = ComponentMapper.getFor(ScriptComponent.class);
+	HashMap<String, InventorySlot> inventory;
+	private boolean inventoryOpen = false;
 	
 	class InventorySlot {
 		public InventorySlot(int slot, int count) {
@@ -33,21 +45,10 @@ public class PlayerScript extends Script {
 		int slotNumber;
 	}
 	
-	private int lastMovingDirection = Keys.DOWN;
-	private ComponentMapper<PhysicsComponent> physicsComponentMapper = ComponentMapper.getFor(PhysicsComponent.class);
-	private ComponentMapper<AnimationComponent> animationComponentMapper = ComponentMapper.getFor(AnimationComponent.class);
-	private ComponentMapper<ItemComponent> itemComponentMapper = ComponentMapper.getFor(ItemComponent.class);
-	private ComponentMapper<GuiComponent> guiComponentMapper = ComponentMapper.getFor(GuiComponent.class);
-	private ComponentMapper<SoundComponent> soundComponentMapper = ComponentMapper.getFor(SoundComponent.class);
-	Hashtable<String, InventorySlot> inventory = new Hashtable<String, InventorySlot>();
-	private boolean inventoryOpen = false;
-	
-	
-	
 	public PlayerScript(Entity selfEntity) {
 		super(selfEntity);
+		inventory = new HashMap<String, InventorySlot>();
 	}
-
 	
 	@Override
 	public void update(float deltaTime) {
@@ -152,28 +153,46 @@ public class PlayerScript extends Script {
 					animationComponentMapper.get(self).setActiveAnimation("IdleUp", false);
 					break;
 			}
-		}
-		
-		if (eventName.contentEquals("ItemPicked")) {
+		} else if (eventName.contentEquals("ItemPicked")) {
 			Item pickedItem = itemComponentMapper.get(sender).item;
-			GuiComponent inventoryGui = guiComponentMapper.get(self);
-			if (inventory.containsKey(pickedItem.name)) {
-				InventorySlot slot = inventory.get(pickedItem.name);
-				slot.itemCount++;
-				Label slotLabel = (Label)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(2);
-				if (slot.itemCount > 1) {
-					slotLabel.setVisible(true);
-					slotLabel.setText(Integer.toString(slot.itemCount));
-				}
-			} else {
-				Group inventorySlot = ((Group)inventoryGui.actors.getChild(inventory.size()));
-				inventory.put(pickedItem.name, new InventorySlot(inventory.size(), 1));
-				Image itemImage = (Image)inventorySlot.getChild(1);
-				Image borderImage =  (Image)inventorySlot.getChild(0);
-				itemImage.setPosition(borderImage.getX(), borderImage.getY());
-				itemImage.setSize(borderImage.getWidth(), borderImage.getHeight());
-				itemImage.setDrawable(new TextureRegionDrawable(pickedItem.getTextureRegion()));
+			InventorySlot slot = inventory.get(pickedItem.name);
+			int newAmount = slot == null ? 1 : slot.itemCount + 1;
+			updateInventory(pickedItem, newAmount);
+		} else if (eventName == "CookingStarted") {
+			Recipe activeReceipt = ((CookerScript)scriptComponentMapper.get(sender).script).activeRecipe;
+			for (Ingredient i : activeReceipt.ingredients) {
+				updateInventory(i.item, inventory.get(i.item.name).itemCount - i.amount);
 			}
+		}
+	}
+	
+	private void updateInventory(Item updatingItem, int newAmount) {
+		GuiComponent inventoryGui = guiComponentMapper.get(self);
+		if (inventory.containsKey(updatingItem.name)) {
+			InventorySlot slot = inventory.get(updatingItem.name);
+			slot.itemCount = newAmount;
+			Label slotLabel = (Label)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(2);
+			if (slot.itemCount == 0) {
+				slotLabel.setVisible(false);
+				Image itemImage = (Image)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(1);
+				((TextureRegionDrawable)itemImage.getDrawable()).getRegion().getTexture().dispose();
+				itemImage.setDrawable(null);
+				inventory.remove(updatingItem.name);
+			} else if (slot.itemCount == 1) {
+				slotLabel.setVisible(false);
+				slotLabel.setText(Integer.toString(slot.itemCount));
+			} else if (slot.itemCount > 1) {
+				slotLabel.setVisible(true);
+				slotLabel.setText(Integer.toString(slot.itemCount));
+			}
+		} else {
+			Group inventorySlot = ((Group)inventoryGui.actors.getChild(inventory.size()));
+			inventory.put(updatingItem.name, new InventorySlot(inventory.size(), newAmount));
+			Image itemImage = (Image)inventorySlot.getChild(1);
+			Image borderImage =  (Image)inventorySlot.getChild(0);
+			itemImage.setPosition(borderImage.getX(), borderImage.getY());
+			itemImage.setSize(borderImage.getWidth(), borderImage.getHeight());
+			itemImage.setDrawable(new TextureRegionDrawable(updatingItem.getTextureRegion()));
 		}
 	}
 }

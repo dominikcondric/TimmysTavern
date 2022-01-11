@@ -172,6 +172,8 @@ public class GameScreen implements Screen {
 		ScriptComponent playerScriptComponent = new ScriptComponent(new PlayerScript(player));
 		playerScriptComponent.eventsToListen.add("SceneChanged");
 		playerScriptComponent.eventsToListen.add("ItemPicked");
+		playerScriptComponent.eventsToListen.add("StartItemChecking");
+		playerScriptComponent.eventsToListen.add("CookingStarted");
 		playerScriptComponent.eventsToDispatch.add("FollowMe");
 		player.add(playerScriptComponent);
 		// Player physics component
