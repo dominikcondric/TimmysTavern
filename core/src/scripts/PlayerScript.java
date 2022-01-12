@@ -17,7 +17,6 @@ import com.gdx.game.Item;
 import components.AnimationComponent;
 import components.GuiComponent;
 import components.ItemComponent;
-import components.NewSceneComponent;
 import components.PhysicsComponent;
 import components.ScriptComponent;
 import components.SoundComponent;
@@ -142,9 +141,9 @@ public class PlayerScript extends Script {
 	@Override
 	public void onEventReceived(Entity sender, String eventName) {
 		if (eventName.contentEquals("SceneChanged")) {
-			switch (sender.getComponent(NewSceneComponent.class).sceneName) {
+			switch (((DoorScript)sender.getComponent(ScriptComponent.class).script).newSceneName) {
 				case "village":
-					physicsComponentMapper.get(self).body.setTransform(new Vector2(48.f, 28.f),  0.f);
+					physicsComponentMapper.get(self).body.setTransform(new Vector2(49.f, 28.f),  0.f);
 					animationComponentMapper.get(self).setActiveAnimation("IdleDown", false);
 					break;
 				

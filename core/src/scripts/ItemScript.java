@@ -42,15 +42,17 @@ public class ItemScript extends Script {
 		}
 		
 		Image borderImage = new Image(new Texture(Gdx.files.internal("InventoryItemBorder.png")));
-		borderImage.setPosition(50f, 900f);
-		borderImage.setSize(500f, 50.f);
+		borderImage.setFillParent(true);
 		guiComp.actors.addActor(borderImage);
 		
-		Label label = new Label("Press ENTER to pick " + self.getComponent(ItemComponent.class).item.name, new LabelStyle(TimmysTavern.font, Color.WHITE));
+		Label label = new Label("Pritisni ENTER da uzmes predmet: " + self.getComponent(ItemComponent.class).item.guiName, new LabelStyle(TimmysTavern.font, Color.WHITE));
+		label.setFillParent(true);
 		label.setFontScale(2.f);
-		label.setPosition(50f, 900f);
-		label.setSize(500f, 50.f);
+		label.setWrap(true);
 		label.setAlignment(Align.center);
+		
+		guiComp.actors.setPosition(Gdx.graphics.getWidth() / 12.f, Gdx.graphics.getHeight() * 0.8f);
+		guiComp.actors.setSize(Gdx.graphics.getWidth() / 5.f, Gdx.graphics.getHeight() * 0.1f);
 		guiComp.actors.addActor(label);
 		guiComp.actors.setVisible(false);
 	}

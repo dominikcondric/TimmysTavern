@@ -7,8 +7,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 
 import components.CameraComponent;
-import components.NewSceneComponent;
+import components.AddEntityComponent;
 import components.PhysicsComponent;
+import components.ScriptComponent;
 
 public class FollowingCameraScript extends Script {
 	private ComponentMapper<CameraComponent> camCompMapper = ComponentMapper.getFor(CameraComponent.class);
@@ -53,7 +54,7 @@ public class FollowingCameraScript extends Script {
 			
 			camera.update();
 		} else if (eventName.contentEquals("SceneChanged")) {
-			switch (sender.getComponent(NewSceneComponent.class).sceneName) {
+			switch (((DoorScript)sender.getComponent(ScriptComponent.class).script).newSceneName) {
 				case "tavern":
 					xLimits.y = 20.f;
 					yLimits.y = 15.f;

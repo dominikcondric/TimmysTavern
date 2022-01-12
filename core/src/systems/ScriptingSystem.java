@@ -9,14 +9,14 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 
-import components.NewSceneComponent;
+import components.AddEntityComponent;
 import components.ScriptComponent;
 
 public class ScriptingSystem extends EntitySystem {
 	private Family scriptingCompFamily = Family.all(ScriptComponent.class).get();
-	private Family newSceneCompFamily = Family.all(ScriptComponent.class, NewSceneComponent.class).get();
+	private Family newSceneCompFamily = Family.all(ScriptComponent.class, AddEntityComponent.class).get();
 	private ComponentMapper<ScriptComponent> scriptCompMapper = ComponentMapper.getFor(ScriptComponent.class);
-	private ComponentMapper<NewSceneComponent> newSceneCompMapper = ComponentMapper.getFor(NewSceneComponent.class);
+	private ComponentMapper<AddEntityComponent> newSceneCompMapper = ComponentMapper.getFor(AddEntityComponent.class);
 	private HashMap<String, Event> eventsTable;
 	private ArrayList<Event> completedEvents;
 	
@@ -78,19 +78,5 @@ public class ScriptingSystem extends EntitySystem {
 		
 		eventsTable.clear();
 		completedEvents.clear();
-		
-		for (Entity newSceneEntity : getEngine().getEntitiesFor(newSceneCompFamily)) {
-			NewSceneComponent newSceneComp = newSceneCompMapper.get(newSceneEntity);
-			if (newSceneComp.load) {
-				newSceneComp.load = false;
-				getEngine().removeAllEntities();
-				
-				for (Entity e : newSceneComp.newEntities) {
-					getEngine().addEntity(e);
-				}
-				
-				break;
-			}
-		}
 	}
 }

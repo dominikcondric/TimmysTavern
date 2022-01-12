@@ -33,19 +33,21 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.gdx.game.Item;
 import com.gdx.game.TimmysTavern;
 
+import components.AddEntityComponent;
 import components.AnimationComponent;
 import components.CameraComponent;
+import components.DestroyEntityComponent;
 import components.EntityBits;
 import components.GuiComponent;
 import components.ItemComponent;
 import components.MapComponent;
 import components.MusicComponent;
-import components.NewSceneComponent;
 import components.PhysicsComponent;
 import components.ScriptComponent;
 import components.SoundComponent;
@@ -56,9 +58,11 @@ import scripts.DoorScript;
 import scripts.FollowingCameraScript;
 import scripts.ItemScript;
 import scripts.PlayerScript;
+import scripts.TavernScript;
 import systems.AudioSystem;
 import systems.PhysicsSystem;
 import systems.RenderingSystem;
+import systems.SceneManagementSystem;
 import systems.ScriptingSystem;
 
 public class GameScreen implements Screen {
@@ -73,12 +77,14 @@ public class GameScreen implements Screen {
 		ecs.addSystem(new RenderingSystem(game.batch, 1));
 		ecs.addSystem(new PhysicsSystem(new Vector2(0.f, 0.f), 2));
 		ecs.addSystem(new ScriptingSystem(0));
+		ecs.addSystem(new SceneManagementSystem(4));
 		ecs.addSystem(new AudioSystem(3));
 		ecs.addEntityListener(Family.all(PhysicsComponent.class).get(), new EntityListener() {
 			
 			@Override
 			public void entityRemoved(Entity entity) {
-				entity.getComponent(PhysicsComponent.class).body.setActive(false);
+				if (entity.getComponent(PhysicsComponent.class).body != null)
+					entity.getComponent(PhysicsComponent.class).body.setActive(false);
 			}
 			
 			@Override
@@ -132,13 +138,12 @@ public class GameScreen implements Screen {
 	private void loadScenes() {
 		villageEntities = new ArrayList<Entity>();
 		tavernEntities = new ArrayList<Entity>();
-		ArrayList<NewSceneComponent> newSceneComps = new ArrayList<NewSceneComponent>();
+		ArrayList<AddEntityComponent> addEntityComps = new ArrayList<AddEntityComponent>();
 		
 		Entity player = new Entity();
-		player.flags |= EntityBits.NO_DESTROY_BIT;
-		float playerWHRation = 20f / 28f;
-		Vector2 playerPosition = new Vector2(48.f, 28.f);
-		Vector2 playerSize = new Vector2(2 * playerWHRation, 2f);
+		float playerWHRatio = 20f / 28f;
+		Vector2 playerPosition = new Vector2(49.f, 28.f);
+		Vector2 playerSize = new Vector2(2 * playerWHRatio, 2f);
 		
 		// Player sprite/animation components
 		@SuppressWarnings(value = { "unchecked" })
@@ -174,17 +179,18 @@ public class GameScreen implements Screen {
 		playerScriptComponent.eventsToListen.add("ItemPicked");
 		playerScriptComponent.eventsToListen.add("StartItemChecking");
 		playerScriptComponent.eventsToListen.add("CookingStarted");
+		playerScriptComponent.eventsToListen.add("BorrowWorld");
 		playerScriptComponent.eventsToDispatch.add("FollowMe");
+		playerScriptComponent.eventsToDispatch.add("TakeOrder");
 		player.add(playerScriptComponent);
 		// Player physics component
 		PhysicsSystem physicsSystem = ecs.getSystem(PhysicsSystem.class);
-		PhysicsComponent playerPhysicsComp = (PhysicsComponent)player.addAndReturn(new PhysicsComponent());
 		
 		// Player physics component
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(playerPosition);
 		bodyDef.type = BodyType.DynamicBody;
-		playerPhysicsComp.body = physicsSystem.createBody(bodyDef);
+		Body body = physicsSystem.createBody(bodyDef);
 		
 		FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape shape = new PolygonShape();
@@ -192,8 +198,9 @@ public class GameScreen implements Screen {
 		fixtureDef.shape = shape;
 		fixtureDef.filter.categoryBits = EntityBits.PLAYER_B2D_BIT;
 		fixtureDef.filter.maskBits = 0xFF;
-		playerPhysicsComp.body.createFixture(fixtureDef).setUserData(playerScriptComponent.script);
+		body.createFixture(fixtureDef).setUserData(playerScriptComponent.script);
 		shape.dispose();
+		player.add(new PhysicsComponent(body));
 		
 		GuiComponent playerInventory = new GuiComponent();
 		playerInventory.actors.setVisible(false);
@@ -212,20 +219,19 @@ public class GameScreen implements Screen {
 		
 		for (int i = 4; i >= 0; --i) {
 			for (int j = 0; j < 5; ++j) {
-				Image border = new Image(borderTexture);
-				border.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
-				border.setSize(inventorySlotSize, inventorySlotSize);
 				Group inventoryItemGroup = new Group();
+				inventoryItemGroup.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
+				inventoryItemGroup.setSize(inventorySlotSize, inventorySlotSize);
+				Image border = new Image(borderTexture);
+				border.setFillParent(true);
 				Label label = new Label("", labelStyle);
-				label.setFontScale(2f);
-				label.setPosition(firstImageX + j * inventorySlotSize + inventorySlotSize * (2f/3f), firstImageY + i * inventorySlotSize + inventorySlotSize * (1f/4f));
-				label.setSize(10f, 10f);
+				label.setFillParent(true);
 				label.setVisible(false);
+				label.setAlignment(Align.bottomLeft);
+				label.setFontScale(2.f);
 				Image emptyImage = new Image();
-				emptyImage.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
-				emptyImage.setSize(inventorySlotSize, inventorySlotSize);
 				inventoryItemGroup.addActor(border);
-				inventoryItemGroup.addActor(new Image());
+				inventoryItemGroup.addActor(emptyImage);
 				inventoryItemGroup.addActor(label);
 				playerInventory.actors.addActor(inventoryItemGroup);
 			}
@@ -234,16 +240,11 @@ public class GameScreen implements Screen {
 		backgroundBlack.dispose();
 		player.add(playerInventory);
 		
-		
 		SoundComponent playerSoundComp = new SoundComponent();
 		playerSoundComp.addSound("inventoryOpen", Gdx.files.internal("RPGsounds_Kenney\\OGG\\bookOpen.ogg"), false, false);
 		player.add(playerSoundComp);
-		villageEntities.add(player);
-		tavernEntities.add(player);
-		
 		
 		Entity cameraEntity = new Entity();
-		cameraEntity.flags |= EntityBits.NO_DESTROY_BIT;
 		float screenAspectRatio = (float)Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
 		CameraComponent camComp = new CameraComponent(30.f * screenAspectRatio, 30.f);
 		camComp.camera.position.set(playerPosition, 0.f);
@@ -254,32 +255,25 @@ public class GameScreen implements Screen {
 		camScriptComp.eventsToListen.add("SceneChanged");
 		camScriptComp.eventsToListen.add("FollowMe");
 		
-		villageEntities.add(cameraEntity);
-		tavernEntities.add(cameraEntity);
+		loadVillageEntities(villageEntities, addEntityComps);
+		loadTavernEntities(tavernEntities, addEntityComps);
 		
-		loadVillageEntities(villageEntities, newSceneComps);
-		loadTavernEntities(tavernEntities, newSceneComps);
+		addEntityComps.get(0).entitiesToAdd = tavernEntities;
+		addEntityComps.get(1).entitiesToAdd = villageEntities;
 		
-		for (NewSceneComponent nsc : newSceneComps) {
-			switch (nsc.sceneName) {
-			case "village":
-				nsc.newEntities = villageEntities;
-				break;
-			case "tavern":
-				nsc.newEntities = tavernEntities;
-			}
-		}
-		
+		ecs.addEntity(cameraEntity);
+		ecs.addEntity(player);
 		for (Entity e : villageEntities) {
 			ecs.addEntity(e);
 		}
 	}
 	
-	private void loadVillageEntities(ArrayList<Entity> villageEntities, ArrayList<NewSceneComponent> newSceneComps) {	
+	private void loadVillageEntities(ArrayList<Entity> villageEntities, ArrayList<AddEntityComponent> newSceneComps) {	
 		Entity mapEntity = new Entity();
 		MapComponent mapComp = new MapComponent("Maps/Village.tmx");
 		mapComp.setLastBackgroundLayerToRenderIndex(5);
 		mapEntity.add(mapComp);
+		mapEntity.add(new DestroyEntityComponent());
 		
 		// Background music
 		MusicComponent musicComp = (MusicComponent)mapEntity.addAndReturn(new MusicComponent(Gdx.files.internal("PGS Fantasy RPG Music Pack/Town-Village Theme 1.ogg")));
@@ -287,7 +281,6 @@ public class GameScreen implements Screen {
 		musicComp.shouldPlay = true;
 		musicComp.music.setVolume(0.2f);
 
-		PhysicsComponent mapPhysicsComp = (PhysicsComponent)mapEntity.addAndReturn(new PhysicsComponent());
 		PhysicsSystem physicsSystem = ecs.getSystem(PhysicsSystem.class);
 		
 		float mapScalingFactor = 1f / mapComp.map.getProperties().get("tilewidth", Integer.class);
@@ -338,12 +331,11 @@ public class GameScreen implements Screen {
 			polyShape.dispose();
 		}
 		
-		mapPhysicsComp.body = body;
+		mapEntity.add(new PhysicsComponent(body));
 		villageEntities.add(mapEntity);
 		
 		for (RectangleMapObject object : mapComp.map.getLayers().get("Interactables").getObjects().getByType(RectangleMapObject.class)) {
 			Entity interactable = new Entity();
-			PhysicsComponent interactablePhysicsComp = (PhysicsComponent)interactable.addAndReturn(new PhysicsComponent());
 			Rectangle rect = object.getRectangle();
 			rect.set(rect.x * mapScalingFactor, rect.y * mapScalingFactor, rect.width * mapScalingFactor, rect.height * mapScalingFactor);
 			bodyDef = new BodyDef();
@@ -358,15 +350,15 @@ public class GameScreen implements Screen {
 			fixtureDef.filter.groupIndex = -EntityBits.STATIC_SCENERY_B2D_GROUP;
 			fixtureDef.filter.maskBits = EntityBits.PLAYER_B2D_BIT;
 			
-			interactablePhysicsComp.body = body;
+			interactable.add(new PhysicsComponent(body));
 			
 			switch (object.getName()) {
 				case "TavernDoor":
 				{
-					interactable.add(new ScriptComponent(new DoorScript(interactable)));
-					NewSceneComponent newSceneComp = (NewSceneComponent)interactable.addAndReturn(new NewSceneComponent("tavern"));
+					interactable.add(new ScriptComponent(new DoorScript(interactable, "tavern")));
+					AddEntityComponent addEntityComp = (AddEntityComponent)interactable.addAndReturn(new AddEntityComponent());
+					newSceneComps.add(addEntityComp);
 					fixtureDef.isSensor = true;
-					newSceneComps.add(newSceneComp);
 					break;
 				}
 				case "apple":
@@ -493,14 +485,20 @@ public class GameScreen implements Screen {
 			
 			body.createFixture(fixtureDef).setUserData(interactable.getComponent(ScriptComponent.class).script);
 			polyShape.dispose();
+			interactable.add(new DestroyEntityComponent());
 			villageEntities.add(interactable);
 		}
 	}
 	
-	void loadTavernEntities(ArrayList<Entity> tavernEntities, ArrayList<NewSceneComponent> newSceneComps) {
+	void loadTavernEntities(ArrayList<Entity> tavernEntities, ArrayList<AddEntityComponent> addEntityComps) {
 		Entity mapEntity = new Entity();
+		mapEntity.add(new DestroyEntityComponent());
 		MapComponent mapComp = new MapComponent("Maps/Tavern.tmx");
 		mapEntity.add(mapComp);
+		
+		// Script creation
+		mapEntity.add(new ScriptComponent(new TavernScript(mapEntity)));
+		((AddEntityComponent)mapEntity.addAndReturn(new AddEntityComponent())).sceneChange = false;
 	
 		// Background music
 		MusicComponent musicComp = (MusicComponent)mapEntity.addAndReturn(new MusicComponent(Gdx.files.internal("PGS Fantasy RPG Music Pack/Town-Village Theme 3.ogg")));
@@ -508,7 +506,6 @@ public class GameScreen implements Screen {
 		musicComp.shouldPlay = true;
 		musicComp.music.setVolume(0.2f);
 
-		PhysicsComponent mapPhysicsComp = (PhysicsComponent)mapEntity.addAndReturn(new PhysicsComponent());
 		PhysicsSystem physicsSystem = ecs.getSystem(PhysicsSystem.class);
 		
 		float mapScalingFactor = 1f / mapComp.map.getProperties().get("tilewidth", Integer.class);
@@ -541,12 +538,11 @@ public class GameScreen implements Screen {
 			polyShape.dispose();
 		}
 		
-		mapPhysicsComp.body = body;
+		mapEntity.add(new PhysicsComponent(body));
 		tavernEntities.add(mapEntity);
 		
 		for (RectangleMapObject object : mapComp.map.getLayers().get("Interactables").getObjects().getByType(RectangleMapObject.class)) {
 			Entity interactable = new Entity();
-			PhysicsComponent interactablePhysicsComp = (PhysicsComponent)interactable.addAndReturn(new PhysicsComponent());
 			Rectangle rect = object.getRectangle();
 			rect.set(rect.x * mapScalingFactor, rect.y * mapScalingFactor, rect.width * mapScalingFactor, rect.height * mapScalingFactor);
 			bodyDef = new BodyDef();
@@ -563,21 +559,21 @@ public class GameScreen implements Screen {
 			fixtureDef.filter.groupIndex = -EntityBits.STATIC_SCENERY_B2D_GROUP;
 			fixtureDef.filter.maskBits = EntityBits.PLAYER_B2D_BIT;
 			
-			interactablePhysicsComp.body = body;
+			interactable.add(new PhysicsComponent(body));
 			
 			switch (object.getName()) {
 				case "TavernDoor":
 				{
-					DoorScript tavernDoorScript = new DoorScript(interactable);
+					DoorScript tavernDoorScript = new DoorScript(interactable, "village");
 					interactable.add(new ScriptComponent(tavernDoorScript));
-					NewSceneComponent newSceneComp = (NewSceneComponent)interactable.addAndReturn(new NewSceneComponent("village"));
-					newSceneComps.add(newSceneComp);
+					AddEntityComponent addEntityComp = (AddEntityComponent)interactable.addAndReturn(new AddEntityComponent());
+					addEntityComps.add(addEntityComp);
 					body.createFixture(fixtureDef).setUserData(interactable.getComponent(ScriptComponent.class).script);
 					break;
 				}
-				case "Cooker":
+				case "Cooker1":
+				case "Cooker2":
 				{
-					interactable.flags |= EntityBits.NO_DESTROY_BIT;
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
 					interactable.add(itemSoundComp);
@@ -588,6 +584,7 @@ public class GameScreen implements Screen {
 			}
 			
 			polyShape.dispose();
+			interactable.add(new DestroyEntityComponent());
 			tavernEntities.add(interactable);
 		}
 	}

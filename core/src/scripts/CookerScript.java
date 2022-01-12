@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
@@ -35,6 +37,7 @@ import components.SoundComponent;
 import scripts.PlayerScript.InventorySlot;
 
 public class CookerScript extends Script implements Disposable {
+	private ComponentMapper<GuiComponent> guiCompMapper = ComponentMapper.getFor(GuiComponent.class);
 	private ComponentMapper<ScriptComponent> scriptCompMapper = ComponentMapper.getFor(ScriptComponent.class);
 	private ArrayList<Recipe> meals;
 	private Table recipesList;
@@ -52,6 +55,7 @@ public class CookerScript extends Script implements Disposable {
 	private TextButtonStyle cookButtonStyle;
 	private Label cookingCounterLabel;
 	private float cookingCounter = 0f;
+	private ImageButton takeMealButton;
 	
 	class Ingredient {
 		Item item;
@@ -65,13 +69,15 @@ public class CookerScript extends Script implements Disposable {
 	}
 	
 	class Recipe {
-		Recipe(String name, int timeToCook) {
+		Recipe(String name, int timeToCook, Texture texture) {
 			this.name = name;
 			this.timeToCook = timeToCook;
 			ingredients = new ArrayList<>();
+			this.texture = texture;
 		}
 		
-		String name;
+		final String name;
+		final Texture texture;
 		ArrayList<Ingredient> ingredients;
 		TextButton button;
 		int timeToCook;
@@ -87,15 +93,15 @@ public class CookerScript extends Script implements Disposable {
 		cookingCounterLabel.setFontScale(3.f);
 		cookingCounterLabel.setAlignment(Align.center);
 		
-		Recipe recipe = new Recipe("Pita od jabuka", 10);
+		Recipe recipe = new Recipe("Pita od jabuka", 10, new Texture(Gdx.files.internal("Ghostpixxells_pixelfood\\05_apple_pie.png")));
 		meals.add(recipe);
 		recipe.ingredients.add(new Ingredient(Item.APPLE, 10));
-		recipe.ingredients.add(new Ingredient(Item.FLOUR, 20));
-		recipe.ingredients.add(new Ingredient(Item.SUGAR, 3));
-		recipe.ingredients.add(new Ingredient(Item.OIL, 5));
-		recipe.ingredients.add(new Ingredient(Item.WATER, 10));
-		
-		recipe = new Recipe("Kolac od borovnica", 30);
+//		recipe.ingredients.add(new Ingredient(Item.FLOUR, 20));
+//		recipe.ingredients.add(new Ingredient(Item.SUGAR, 3));
+//		recipe.ingredients.add(new Ingredient(Item.OIL, 5));
+//		recipe.ingredients.add(new Ingredient(Item.WATER, 10));
+//		
+		recipe = new Recipe("Kolac od borovnica i cokolade", 30, new Texture(Gdx.files.internal("Ghostpixxells_pixelfood\\30_chocolatecake.png")));
 		meals.add(recipe);
 		recipe.ingredients.add(new Ingredient(Item.BLUEBERRY, 40));
 		recipe.ingredients.add(new Ingredient(Item.FLOUR, 20));
@@ -103,7 +109,7 @@ public class CookerScript extends Script implements Disposable {
 		recipe.ingredients.add(new Ingredient(Item.OIL, 10));
 		recipe.ingredients.add(new Ingredient(Item.BAKING_POWDER, 2));
 		
-		recipe = new Recipe("Hamburger", 3);
+		recipe = new Recipe("Hamburger", 3, new Texture(Gdx.files.internal("Ghostpixxells_pixelfood\\15_burger.png")));
 		meals.add(recipe);
 		recipe.ingredients.add(new Ingredient(Item.BREAD, 40));
 		recipe.ingredients.add(new Ingredient(Item.BEEF, 20));
@@ -111,7 +117,7 @@ public class CookerScript extends Script implements Disposable {
 		recipe.ingredients.add(new Ingredient(Item.KETCHUP, 1));
 		recipe.ingredients.add(new Ingredient(Item.MAYONNAISE, 1));
 		
-		recipe = new Recipe("Govedji gulas", 30);
+		recipe = new Recipe("Govedji gulas", 30, new Texture(Gdx.files.internal("Ghostpixxells_pixelfood\\41_eggsalad_bowl.png")));
 		meals.add(recipe);
 		recipe.ingredients.add(new Ingredient(Item.BEEF, 2));
 		recipe.ingredients.add(new Ingredient(Item.SALT, 2));
@@ -120,13 +126,17 @@ public class CookerScript extends Script implements Disposable {
 		recipe.ingredients.add(new Ingredient(Item.OIL, 1));
 		recipe.ingredients.add(new Ingredient(Item.POTATO, 3));
 		
-		final float inventorySlotSize = Gdx.graphics.getWidth() / 30.f;
-		final float startX = inventorySlotSize * 2;
-		final float startY = Gdx.graphics.getHeight() - inventorySlotSize * 6;
+		final float guiSize = Gdx.graphics.getWidth() / 6.f;
+		final float startX = guiSize / 3f;
+		final float startY = Gdx.graphics.getHeight() - guiSize * 1.2f;
 		Texture borderTexture = new Texture(Gdx.files.internal("InventoryItemBorder.png"));
 		
 		recipesList = new Table();
+		recipesList.setFillParent(true);
+		recipesList.center();
 		recipeIngredientList = new Table();
+		recipeIngredientList.center();
+		recipeIngredientList.setFillParent(true);
 		recipesList.setBackground(new TextureRegionDrawable(new TextureRegion(borderTexture)));
 		recipeIngredientList.setBackground(new TextureRegionDrawable(new TextureRegion(borderTexture)));
 		textButtonStyle = new TextButtonStyle();
@@ -135,24 +145,42 @@ public class CookerScript extends Script implements Disposable {
 		textButtonStyle.overFontColor = Color.YELLOW;
 		textButtonStyle.downFontColor = Color.GOLD;
 		
-		cookButtonStyle = new TextButtonStyle(textButtonStyle);
-		Pixmap grayBackground = new Pixmap(1, 1, Format.RGB888);
-		grayBackground.setColor(Color.GRAY);
-		grayBackground.fill();
-		cookButtonStyle.up = new TextureRegionDrawable(new Texture(grayBackground));
-		cookButtonStyle.fontColor = Color.BLACK;
-		cookButtonStyle.overFontColor = Color.GOLD;
+		ImageButtonStyle imageButtonStyle = new ImageButtonStyle();
+		takeMealButton = new ImageButton(imageButtonStyle);
+		takeMealButton.align(Align.center);
+		takeMealButton.pad(30f);
+		takeMealButton.addListener(new ClickListener(Buttons.LEFT) {
+
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				recipeIngredientList.clear();
+				GuiComponent guiComp = guiCompMapper.get(self);
+				guiComp.actors.clear();
+				guiComp.actors.addActor(recipeListScrollPane);
+				activeRecipe = null;
+				((TextureRegionDrawable)takeMealButton.getStyle().up).getRegion().getTexture().dispose();
+				self.getComponent(SoundComponent.class).getSoundEffect("mealTake").shouldPlay = true;
+				cookingCounter = 0f;
+			}
+			
+		});
 		
-		goBackButton = new TextButton("Back", cookButtonStyle);
+		cookButtonStyle = new TextButtonStyle(textButtonStyle);
+		cookButtonStyle.fontColor = Color.LIME;
+		cookButtonStyle.overFontColor = Color.GREEN;
+		
+		goBackButton = new TextButton("Natrag", cookButtonStyle);
 		goBackButton.align(Align.center);
+		goBackButton.pad(5f);
 		goBackButton.getLabel().setFontScale(2.f);
 		goBackButton.addListener(new ClickListener(Buttons.LEFT) {
 			
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				recipeIngredientList.clear();
-				recipeListScrollPane.setVisible(true);
-				recipeIngredientListScrollPane.setVisible(false);
+				GuiComponent guiComp = guiCompMapper.get(self);
+				guiComp.actors.clear();
+				guiComp.actors.addActor(recipeListScrollPane);
 				activeRecipe = null;
 				cookable = false;
 			}
@@ -161,6 +189,7 @@ public class CookerScript extends Script implements Disposable {
 		
 		cookButton = new TextButton("Kuhaj!", cookButtonStyle);
 		cookButton.align(Align.center);
+		cookButton.pad(5f);
 		cookButton.getLabel().setFontScale(2.f);
 		cookButton.addListener(new ClickListener() {
 			@Override
@@ -170,7 +199,6 @@ public class CookerScript extends Script implements Disposable {
 				}
 			}
 		});
-		grayBackground.dispose();
 		
 		for (Recipe r : meals) {
 			recipesList.row();
@@ -178,6 +206,8 @@ public class CookerScript extends Script implements Disposable {
 			r.button = tb;
 			tb.getLabel().setFontScale(2.f);
 			tb.align(Align.center);
+			tb.getLabel().setWrap(true);
+			recipesList.add(tb).fill().expandX();
 			tb.addListener(new ClickListener() {
 
 				@Override
@@ -185,61 +215,66 @@ public class CookerScript extends Script implements Disposable {
 					for (Recipe r : meals) {
 						if (r.button == event.getListenerActor()) {
 							activeRecipe = r;
-							recipeListScrollPane.setVisible(false);
+							recipeIngredientList.clear();
 							createIngredientsList();
-							recipeIngredientListScrollPane.setVisible(true);
+							GuiComponent guiComp = guiCompMapper.get(self);
+							guiComp.actors.clear();
+							guiComp.actors.addActor(recipeIngredientListScrollPane);
 							break;
 						}
 					}
 				}
 				
 			});
-			recipesList.add(tb).expandX();
+			
 		}
 		
 		recipeListScrollPane = new ScrollPane(recipesList);
-		recipeListScrollPane.setVisible(false);
-		recipeListScrollPane.setPosition(startX, startY);
-		recipeListScrollPane.setSize(inventorySlotSize * 5, inventorySlotSize * 5);
+		recipeListScrollPane.setFillParent(true);
 		recipeListScrollPane.setScrollBarPositions(false, true);
 		
 		recipeIngredientListScrollPane = new ScrollPane(recipeIngredientList);
-		recipeIngredientListScrollPane.setVisible(false);
-		recipeIngredientListScrollPane.setPosition(startX, startY);
-		recipeIngredientListScrollPane.setSize(inventorySlotSize * 5, inventorySlotSize * 5);
+		recipeIngredientListScrollPane.setFillParent(true);
 		recipeIngredientListScrollPane.setScrollBarPositions(false, true);
 		
 		GuiComponent guiComponent = new GuiComponent();
+		guiComponent.actors.setPosition(startX, startY);
+		guiComponent.actors.setSize(guiSize, guiSize);
 		guiComponent.actors.addActor(recipeListScrollPane);
-		guiComponent.actors.addActor(recipeIngredientListScrollPane);
+		guiComponent.actors.setVisible(false);
 		self.add(guiComponent);
 		
-		((SoundComponent)self.addAndReturn(new SoundComponent())).addSound("mealComplete", Gdx.files.internal("jingleSounds_Kenney\\OGG\\jingles_SAX\\jingles_SAX16.ogg"), false, false);
+		SoundComponent soundComp = (SoundComponent)self.addAndReturn(new SoundComponent());
+		soundComp.addSound("mealTake", Gdx.files.internal("jingleSounds_Kenney\\OGG\\jingles_SAX\\jingles_SAX16.ogg"), false, false);
+		soundComp.addSound("mealComplete", Gdx.files.internal("RPGsounds_Kenney\\OGG\\metalLatch.ogg"), false, false);
 	}
 	
 	private void createIngredientsList() {
 		Label recipeNameLabel = new Label(activeRecipe.name, new LabelStyle(TimmysTavern.font, Color.BROWN));
+		recipeNameLabel.setWrap(true);
 		recipeNameLabel.setAlignment(Align.center);
 		recipeNameLabel.setFontScale(2.f);
-		recipeIngredientList.add(recipeNameLabel).expandX().colspan(2);
+		recipeIngredientList.add(recipeNameLabel).colspan(2).grow().center();
 		
 		for (Ingredient i : activeRecipe.ingredients) {
 			recipeIngredientList.row();
-			Label IngredientLabel = new Label(i.item.guiName, whiteLabelStyle);
-			IngredientLabel.setFontScale(1.5f);
-			IngredientLabel.setAlignment(Align.center);
-			recipeIngredientList.add(IngredientLabel).width(recipeIngredientListScrollPane.getWidth() * 0.5f);
-			IngredientLabel.setWrap(true);
+			Label ingredientLabel = new Label(i.item.guiName, whiteLabelStyle);
+			ingredientLabel.setWrap(true);
+			ingredientLabel.setFontScale(1.5f);
+			ingredientLabel.setAlignment(Align.center);
+			recipeIngredientList.add(ingredientLabel).grow().center();
 			Label counter = new Label("0", redLabelStyle);
 			counter.setFontScale(1.5f);
 			counter.setAlignment(Align.center);
-			recipeIngredientList.add(counter).width(recipeIngredientListScrollPane.getWidth() / 2.f);
+			recipeIngredientList.add(counter).maxWidth(recipeIngredientList.getWidth() / 4.f);
 		}
 		
 		recipeIngredientList.row();
-		recipeIngredientList.add(goBackButton).maxWidth(recipeIngredientList.getWidth() / 4.f);
-		recipeIngredientList.add(cookButton).maxWidth(recipeIngredientList.getWidth() / 4.f);
+		recipeIngredientList.add(goBackButton).maxWidth(recipeIngredientList.getWidth() / 4.f).grow();
+		recipeIngredientList.add(cookButton).maxWidth(recipeIngredientList.getWidth() / 4.f).grow();
 		scriptCompMapper.get(self).eventsToDispatch.add("StartItemChecking");
+		recipeIngredientList.invalidateHierarchy();
+		recipeIngredientList.layout();
 	}
 
 	@Override
@@ -247,10 +282,16 @@ public class CookerScript extends Script implements Disposable {
 		if (cookingCounter > 0) {
 			cookingCounterLabel.setText(Integer.toString((int)Math.ceil(cookingCounter)));
 			cookingCounter -= deltaTime;
-			if (cookingCounter <= 0) {
+			if (cookingCounter < 0) {
 				recipeIngredientList.clear();
-				recipeIngredientListScrollPane.setVisible(false);
-				recipeListScrollPane.setVisible(true);
+				Label recipeNameLabel = new Label(activeRecipe.name, new LabelStyle(TimmysTavern.font, Color.BROWN));
+				recipeNameLabel.setAlignment(Align.center);
+				recipeNameLabel.setWrap(true);
+				recipeNameLabel.setFontScale(2.f);
+				recipeIngredientList.add(recipeNameLabel).expandX().fill();
+				recipeIngredientList.row();
+				takeMealButton.getStyle().up = new TextureRegionDrawable(activeRecipe.texture);
+				recipeIngredientList.add(takeMealButton);
 				self.getComponent(SoundComponent.class).getSoundEffect("mealComplete").shouldPlay = true;
 			}
 		}
@@ -260,18 +301,17 @@ public class CookerScript extends Script implements Disposable {
 		int completedIngredients = 0;
 		int counter = 0;
 		for (Ingredient i : activeRecipe.ingredients) {
-			if (!playerInventory.containsKey(i.item.name)) {
-				continue;
+			int playerIngredientAmount = 0;
+			if (playerInventory.containsKey(i.item.name)) {
+				playerIngredientAmount = playerInventory.get(i.item.name).itemCount;  
 			}
 			
-			int playerIngredientAmount = playerInventory.get(i.item.name).itemCount;  
 			Label label = (Label)recipeIngredientList.getChildren().get(2 + counter * 2);
+			label.setText(Integer.toString(Math.min(playerIngredientAmount, i.amount)) + " / " + i.amount);
 			 if (playerIngredientAmount >= i.amount) {
-				 label.setText(Math.min(playerIngredientAmount, i.amount));
 				 label.setStyle(greenLabelStyle);
 				 ++completedIngredients;
 			 } else {
-				 label.setText(playerIngredientAmount);
 				 label.setStyle(redLabelStyle);
 			 }
 			 
@@ -285,24 +325,16 @@ public class CookerScript extends Script implements Disposable {
 	@Override
 	public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {
 		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
-			if (activeRecipe == null) {
-				recipeListScrollPane.setVisible(true);
-			} else {
-				recipeIngredientListScrollPane.setVisible(true);
-				if (cookingCounter == 0f)
-					checkCurrentIngredients(((PlayerScript)other.getUserData()).inventory);
-			}
+			guiCompMapper.get(this.self).actors.setVisible(true);
+			if (activeRecipe != null && cookingCounter == 0f) 
+				checkCurrentIngredients(((PlayerScript)other.getUserData()).inventory);
 		}
 	}
 
 	@Override
 	public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {
 		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
-			if (activeRecipe == null) {
-				recipeListScrollPane.setVisible(false);
-			} else {
-				recipeIngredientListScrollPane.setVisible(false);
-			}
+			guiCompMapper.get(this.self).actors.setVisible(false);
 		}
 	}
 	
@@ -327,7 +359,8 @@ public class CookerScript extends Script implements Disposable {
 
 	@Override
 	public void dispose() {
-		((TextureRegionDrawable)goBackButton.getStyle().up).getRegion().getTexture().dispose();
-		((TextureRegionDrawable)cookButton.getStyle().up).getRegion().getTexture().dispose();
+		for (Recipe r : meals) {
+			r.texture.dispose();
+		}
 	}
 }
