@@ -36,7 +36,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.gdx.game.Cookbook;
 import com.gdx.game.Item;
 import com.gdx.game.TimmysTavern;
 
@@ -180,8 +179,9 @@ public class GameScreen implements Screen {
 		playerScriptComponent.eventsToListen.add("StartItemChecking");
 		playerScriptComponent.eventsToListen.add("CookingStarted");
 		playerScriptComponent.eventsToListen.add("BorrowWorld");
+		playerScriptComponent.eventsToListen.add("TakeMeal");
+		playerScriptComponent.eventsToListen.add("NPCMealTake");
 		playerScriptComponent.eventsToDispatch.add("FollowMe");
-		playerScriptComponent.eventsToDispatch.add("TakeOrder");
 		player.add(playerScriptComponent);
 		// Player physics component
 		PhysicsSystem physicsSystem = ecs.getSystem(PhysicsSystem.class);
@@ -485,7 +485,7 @@ public class GameScreen implements Screen {
 		mapEntity.add(mapComp);
 		
 		// Script creation
-		mapEntity.add(new ScriptComponent(new TavernScript(mapEntity)));
+		((ScriptComponent)mapEntity.addAndReturn(new ScriptComponent(new TavernScript(mapEntity)))).eventsToListen.add("NPCMealTake");
 		((AddEntityComponent)mapEntity.addAndReturn(new AddEntityComponent())).sceneChange = false;
 	
 		// Background music

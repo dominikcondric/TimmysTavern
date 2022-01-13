@@ -1,54 +1,54 @@
-<!-- 
-Brzi vodič za dodavanje recepata
-* Pri dodavanju recepata bitno je ispuniti sve kao i u primjerima
-* timeToCook je vrijeme u sekundama
-* Putanja do teksture mora biti relativna ovoj datoteci
-
-
- -->
-
- <Cookbook>
-	 <Ingredients>
-	 	<ingredient name="apple" guiName="Jabuka" textureFile="farm assets\\Fruits and Vegetables\\Apple Red.png"/>
-	 	<ingredient name="blueberry" guiName="Borovnica" textureFile="farm assets\\Fruits and Vegetables\\Apple Red.png"/>
-	 	<ingredient name="cranberry"  guiName="Brusnica" textureFile="farm assets\\Fruits and Vegetables\\Cranberries.png"/>
-	 	<ingredient name="bread"  guiName="Kruh" textureFile="Ghostpixxells_pixelfood\\07_bread.png"/>
-	 	<ingredient name="mushroom"  guiName="Gljive" textureFile="farm assets\\Fruits and Vegetables\\Mushroom White.png"/>
-	 	<ingredient name="sugar"  guiName="Secer" textureFile="Pixel_Mart\\sugar.png"/>
-	 	<ingredient name="egg"  guiName="Jaja" textureFile="Pixel_Mart\\egg_brown.png"/>
-	 	<ingredient name="flour"  guiName="Brasno" textureFile="Pixel_Mart\\flour.png"/>
-	 	<ingredient name="carrot"  guiName="Mrkva" textureFile="farm assets\\Fruits and Vegetables\\Carrot.png"/>
-	 	<ingredient name="oil"  guiName="Ulje" textureFile="Pixel_Mart\\cooking_oil.png"/>
-	 	<ingredient name="water"  guiName="Voda" textureFile="Pixel_Mart\\water.png"/>
-	 	<ingredient name="bakingPowder"  guiName="Prasak za pecivo" textureFile="Pixel_Mart\\baking_powder.png"/>
-	 	<ingredient name="pork"  guiName="Svinjetina" textureFile="Pixel_Mart\\meat1.png"/>
-	 	<ingredient name="lamb"  guiName="Janjetina" textureFile="Pixel_Mart\\meat1_p.png"/>
-	 	<ingredient name="govedina"  guiName="Govedina" textureFile="Pixel_Mart\\meat2.png"/>
-	 	<ingredient name="chicken"  guiName="Piletina" textureFile="Pixel_Mart\\meat3.png"/>
-	 	<ingredient name="tuna"  guiName="Tuna" textureFile="Pixel_Mart\\fish.png"/>
-	 	<ingredient name="trout"  guiName="Pastrva" textureFile="Pixel_Mart\\salmon.png"/>
-	 	<ingredient name="ketchup"  guiName="Kecap" textureFile="Pixel_Mart\\ketchup.png"/>
-	 	<ingredient name="mayonnaise"  guiName="Majoneza" textureFile="Pixel_Mart\\mustard.png"/>
-	 	<ingredient name="salt"  guiName="Sol" textureFile="Pixel_Mart\\salt.png"/>
-	 	<ingredient name="cheese"  guiName="Sir" textureFile="Pixel_Mart\\white_cheese.png"/>
-	 	<ingredient name="salad"  guiName="Salata" textureFile="farm assets\\Fruits and Vegetables\\Lettuce.png"/>
-	 	<ingredient name="tomato"  guiName="Rajcica" textureFile="farm assets\\Fruits and Vegetables\\Tomato.png"/>
-	 	<ingredient name="potato"  guiName="Krumpir" textureFile="farm assets\\Fruits and Vegetables\\Potato.png"/>
-	 	<ingredient name="corn"  guiName="Kukuruz" textureFile="farm assets\\Fruits and Vegetables\\Corn.png"/>
-	 	<ingredient name="eggplant"  guiName="Patlidzan" textureFile="farm assets\\Fruits and Vegetables\\Aubergine.png"/>
-	 	<ingredient name="pepper"  guiName="Paprika" textureFile="arm assets\\Fruits and Vegetables\\Pepper Red.png"/>
-	 	<ingredient name="broccoli"  guiName="Brokula" textureFile="farm assets\\Fruits and Vegetables\\Broccoli.png"/>
-	 	<ingredient name="pasta"  guiName="Pasta" textureFile="Pixel_Mart\\white_cheese.png\\pencil_box.png"/>
-	 	<ingredient name="wine"  guiName="Vino" textureFile="Pixel_Mart\\white_cheese.png\\wine_red.png"/>
-	 	<ingredient name="onion"  guiName="Luk" textureFile="farm assets\\Fruits and Vegetables\\Onion White.png"/>
-	 	<ingredient name="garlic"  guiName="Cesnjak" textureFile="farm assets\\Fruits and Vegetables\\Garlic.png"/>
-	 	<ingredient name="ham"  guiName="Sunka" textureFile="Pixel_Mart\\sausage_p.png"/>
-	 	<ingredient name="chocolate"  guiName="Cokolada" textureFile="Ghostpixxells_pixelfood\\26_chocolate.png"/>
-	 </Ingredients>
+<Cookbook>
+	<Ingredients>
+		<ingredient name="apple" guiName="Jabuka" textureFile="farm assets\\Fruits and Vegetables\\Apple Red.png"/>
+		<ingredient name="blueberry" guiName="Borovnica" textureFile="farm assets\\Fruits and Vegetables\\Blueberries.png"/>
+		<ingredient name="cranberry"  guiName="Brusnica" textureFile="farm assets\\Fruits and Vegetables\\Cranberries.png"/>
+		<ingredient name="bun"  guiName="Pecivo" textureFile="Ghostpixxells_pixelfood\\11_bun.png"/>
+		<ingredient name="mushroom"  guiName="Gljive" textureFile="farm assets\\Fruits and Vegetables\\Mushroom White.png"/>
+		<ingredient name="sugar"  guiName="Secer" textureFile="Pixel_Mart\\sugar.png"/>
+		<ingredient name="egg"  guiName="Jaja" textureFile="Pixel_Mart\\egg_brown.png"/>
+		<ingredient name="flour"  guiName="Brasno" textureFile="Pixel_Mart\\flour.png"/>
+		<ingredient name="carrot"  guiName="Mrkva" textureFile="farm assets\\Fruits and Vegetables\\Carrot.png"/>
+		<ingredient name="oil"  guiName="Ulje" textureFile="Pixel_Mart\\cooking_oil.png"/>
+		<ingredient name="water"  guiName="Voda" textureFile="Pixel_Mart\\water.png"/>
+		<ingredient name="bakingPowder"  guiName="Prasak za pecivo" textureFile="Pixel_Mart\\baking_powder.png"/>
+		<ingredient name="pork"  guiName="Svinjetina" textureFile="Pixel_Mart\\meat1.png"/>
+		<ingredient name="lamb"  guiName="Janjetina" textureFile="Pixel_Mart\\meat1_p.png"/>
+		<ingredient name="beef"  guiName="Govedina" textureFile="Pixel_Mart\\meat2.png"/>
+		<ingredient name="chicken"  guiName="Piletina" textureFile="Pixel_Mart\\meat3.png"/>
+		<ingredient name="tuna"  guiName="Tuna" textureFile="Pixel_Mart\\fish.png"/>
+		<ingredient name="trout"  guiName="Pastrva" textureFile="Pixel_Mart\\salmon.png"/>
+		<ingredient name="ketchup"  guiName="Kecap" textureFile="Pixel_Mart\\ketchup.png"/>
+		<ingredient name="mayonnaise"  guiName="Majoneza" textureFile="Pixel_Mart\\mustard.png"/>
+		<ingredient name="salt"  guiName="Sol" textureFile="Pixel_Mart\\salt.png"/>
+		<ingredient name="cheese"  guiName="Sir" textureFile="Pixel_Mart\\white_cheese.png"/>
+		<ingredient name="salad"  guiName="Salata" textureFile="farm assets\\Fruits and Vegetables\\Lettuce.png"/>
+		<ingredient name="tomato"  guiName="Rajcica" textureFile="farm assets\\Fruits and Vegetables\\Tomato.png"/>
+		<ingredient name="potato"  guiName="Krumpir" textureFile="farm assets\\Fruits and Vegetables\\Potato.png"/>
+		<ingredient name="corn"  guiName="Kukuruz" textureFile="farm assets\\Fruits and Vegetables\\Corn.png"/>
+		<ingredient name="eggplant"  guiName="Patlidzan" textureFile="farm assets\\Fruits and Vegetables\\Aubergine.png"/>
+		<ingredient name="pepper"  guiName="Paprika" textureFile="farm assets\\Fruits and Vegetables\\Pepper Red.png"/>
+		<ingredient name="broccoli"  guiName="Brokula" textureFile="farm assets\\Fruits and Vegetables\\Broccoli.png"/>
+		<ingredient name="pasta"  guiName="Pasta" textureFile="Pixel_Mart\\white_cheese.png\\pencil_box.png"/>
+		<ingredient name="wine"  guiName="Vino" textureFile="Pixel_Mart\\white_cheese.png\\wine_red.png"/>
+		<ingredient name="onion"  guiName="Luk" textureFile="farm assets\\Fruits and Vegetables\\Onion White.png"/>
+		<ingredient name="garlic"  guiName="Cesnjak" textureFile="farm assets\\Fruits and Vegetables\\Garlic.png"/>
+		<ingredient name="ham"  guiName="Sunka" textureFile="Pixel_Mart\\sausage_p.png"/>
+		<ingredient name="chocolate"  guiName="Cokolada" textureFile="Ghostpixxells_pixelfood\\26_chocolate.png"/>
+		<ingredient name="milk"  guiName="Mlijeko" textureFile="Pixel_Mart\\milk_pack.png"/>
+	</Ingredients>
 
 	<Recipes>
 		<recipe name="Pita od jabuka" timeToCook="10" textureFile="Ghostpixxells_pixelfood\\05_apple_pie.png">
 			<ingredient name="apple" amount="10"/>
+		</recipe>
+
+		<recipe name="Hamburger" timeToCook="4" textureFile="Ghostpixxells_pixelfood\\17_burger_napkin.png">
+			<ingredient name="beef" amount="1"/>
+			<ingredient name="salad" amount="1"/>
+			<ingredient name="mayonnaise" amount="2"/>
+			<ingredient name="ketchup" amount="2"/>
+			<ingredient name="bun" amount="1"/>
 		</recipe>
 	</Recipes>
 </Cookbook>

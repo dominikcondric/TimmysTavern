@@ -6,14 +6,14 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
@@ -51,7 +51,7 @@ public class CookerScript extends Script {
 	private TextButtonStyle cookButtonStyle;
 	private Label cookingCounterLabel;
 	private float cookingCounter = 0f;
-	private ImageButton takeMealButton;
+	private Image mealImage;
 	
 	public CookerScript(Entity selfEntity) {
 		super(selfEntity);
@@ -68,11 +68,7 @@ public class CookerScript extends Script {
 		Texture borderTexture = new Texture(Gdx.files.internal("InventoryItemBorder.png"));
 		
 		recipesList = new Table();
-		recipesList.setFillParent(true);
-		recipesList.center();
 		recipeIngredientList = new Table();
-		recipeIngredientList.center();
-		recipeIngredientList.setFillParent(true);
 		recipesList.setBackground(new TextureRegionDrawable(new TextureRegion(borderTexture)));
 		recipeIngredientList.setBackground(new TextureRegionDrawable(new TextureRegion(borderTexture)));
 		textButtonStyle = new TextButtonStyle();
@@ -81,25 +77,7 @@ public class CookerScript extends Script {
 		textButtonStyle.overFontColor = Color.YELLOW;
 		textButtonStyle.downFontColor = Color.GOLD;
 		
-		ImageButtonStyle imageButtonStyle = new ImageButtonStyle();
-		takeMealButton = new ImageButton(imageButtonStyle);
-		takeMealButton.align(Align.center);
-		takeMealButton.pad(30f);
-		takeMealButton.addListener(new ClickListener(Buttons.LEFT) {
-
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				recipeIngredientList.clear();
-				GuiComponent guiComp = guiCompMapper.get(self);
-				guiComp.actors.clear();
-				guiComp.actors.addActor(recipeListScrollPane);
-				activeRecipe = null;
-				((TextureRegionDrawable)takeMealButton.getStyle().up).getRegion().getTexture().dispose();
-				self.getComponent(SoundComponent.class).getSoundEffect("mealTake").shouldPlay = true;
-				cookingCounter = 0f;
-			}
-			
-		});
+		mealImage = new Image();
 		
 		cookButtonStyle = new TextButtonStyle(textButtonStyle);
 		cookButtonStyle.fontColor = Color.LIME;
@@ -208,8 +186,6 @@ public class CookerScript extends Script {
 		recipeIngredientList.add(goBackButton).maxWidth(recipeIngredientList.getWidth() / 4.f).grow();
 		recipeIngredientList.add(cookButton).maxWidth(recipeIngredientList.getWidth() / 4.f).grow();
 		scriptCompMapper.get(self).eventsToDispatch.add("StartItemChecking");
-		recipeIngredientList.invalidateHierarchy();
-		recipeIngredientList.layout();
 	}
 
 	@Override
@@ -225,10 +201,14 @@ public class CookerScript extends Script {
 				recipeNameLabel.setFontScale(2.f);
 				recipeIngredientList.add(recipeNameLabel).expandX().fill();
 				recipeIngredientList.row();
-				takeMealButton.getStyle().up = new TextureRegionDrawable(activeRecipe.texture);
-				recipeIngredientList.add(takeMealButton);
+				mealImage.setDrawable(new TextureRegionDrawable(activeRecipe.texture));
+				recipeIngredientList.add(mealImage);
 				self.getComponent(SoundComponent.class).getSoundEffect("mealComplete").shouldPlay = true;
 			}
+		}
+		
+		if (cookingCounter < 0.f && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
+			scriptCompMapper.get(self).eventsToDispatch.add("TakeMeal");
 		}
 	}
 	
@@ -261,8 +241,9 @@ public class CookerScript extends Script {
 	public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {
 		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
 			guiCompMapper.get(this.self).actors.setVisible(true);
-			if (activeRecipe != null && cookingCounter == 0f) 
+			if (activeRecipe != null && cookingCounter == 0f) { 
 				checkCurrentIngredients(((PlayerScript)other.getUserData()).inventory);
+			}
 		}
 	}
 
@@ -270,6 +251,7 @@ public class CookerScript extends Script {
 	public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {
 		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
 			guiCompMapper.get(this.self).actors.setVisible(false);
+			cookable = false;
 		}
 	}
 	
@@ -289,6 +271,14 @@ public class CookerScript extends Script {
 			recipeIngredientList.add(cookingCounterLabel).grow().center();
 			cookingCounter = activeRecipe.timeToCook;
 			cookable = false;
+		} else if (eventName == "TakeMeal") {
+			scriptCompMapper.get(self).eventsToDispatch.remove(eventName);
+			cookingCounter = 0.f;
+			recipeIngredientList.clear();
+			recipeIngredientListScrollPane.remove();
+			guiCompMapper.get(self).actors.addActor(recipeListScrollPane);
+			activeRecipe = null;
+			
 		}
 	}
 }

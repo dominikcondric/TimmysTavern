@@ -12,8 +12,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
+import com.gdx.game.Item;
 import com.gdx.game.TimmysTavern;
 
+import components.DestroyEntityComponent;
 import components.EntityBits;
 import components.GuiComponent;
 import components.PhysicsComponent;
@@ -21,13 +23,12 @@ import components.ScriptComponent;
 import components.SpriteComponent;
 
 public class NPCCustomerScript extends Script {
-	String orderedRecipe;
+	Item orderedRecipe;
 	private boolean recipeTakeable = false;
-	private boolean recipeTaken = false;
 	
-	public NPCCustomerScript(Entity selfEntity, String orderedRecipe) {
+	public NPCCustomerScript(Entity selfEntity) {
 		super(selfEntity);
-		this.orderedRecipe = orderedRecipe;
+		orderedRecipe = TimmysTavern.cookbook.getRandomRecipeItem();
 		
 		GuiComponent guiComp = self.getComponent(GuiComponent.class);
 		if (guiComp == null) {
@@ -39,7 +40,7 @@ public class NPCCustomerScript extends Script {
 		borderImage.setFillParent(true);
 		guiComp.actors.addActor(borderImage);
 		
-		Label label = new Label("Pritisni ENTER da preuzmes narudzbu: " + orderedRecipe, new LabelStyle(TimmysTavern.font, Color.WHITE));
+		Label label = new Label(orderedRecipe.name, new LabelStyle(TimmysTavern.font, Color.WHITE));
 		label.setFillParent(true);
 		label.setFontScale(2.f);
 		label.setWrap(true);
@@ -53,24 +54,28 @@ public class NPCCustomerScript extends Script {
 
 	@Override
 	public void update(float deltaTime) {
-		if (recipeTakeable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-			self.getComponent(ScriptComponent.class).eventsToDispatch.add("TakeOrder");
-			recipeTaken = true;
-			recipeTakeable = false;
+		if (orderedRecipe != null) {
+			if (recipeTakeable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
+				self.getComponent(ScriptComponent.class).eventsToDispatch.add("NPCMealTake");
+				recipeTakeable = false;
+			}
+		} else {
+			self.getComponent(DestroyEntityComponent.class).destroy = true;
 		}
 	}
 
 	@Override
 	public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {
-		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0 && !recipeTaken) {
-			recipeTakeable = true;
+		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
 			this.self.getComponent(GuiComponent.class).actors.setVisible(true);
+			if (((PlayerScript)other.getUserData()).inventory.containsKey(orderedRecipe.name))
+				recipeTakeable = true;
 		}
 	}
 	
 	@Override
 	public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {
-		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0 && !recipeTaken) {
+		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
 			recipeTakeable = false;
 			this.self.getComponent(GuiComponent.class).actors.setVisible(false);
 		}
@@ -88,7 +93,7 @@ public class NPCCustomerScript extends Script {
 
 	@Override
 	public void onEventResponse(Entity receiver, String eventName) {
-		if (eventName == "TakeOrder") {
+		if (eventName == "NPCMealTake") {
 			self.getComponent(ScriptComponent.class).eventsToDispatch.remove(eventName);
 		}
 	}

@@ -95,8 +95,8 @@
  </objectgroup>
  <objectgroup id="5" name="Interactables">
   <object id="17" name="Chest" x="160" y="128" width="64" height="96"/>
-  <object id="20" name="Cooker2" x="96" y="128" width="64" height="96"/>
+  <object id="20" name="Cooker2" x="98.0821" y="128" width="46.6489" height="96"/>
   <object id="21" name="TavernDoor" x="288" y="416" width="64" height="62.6119"/>
-  <object id="23" name="Cooker1" x="32" y="128" width="64" height="96"/>
+  <object id="23" name="Cooker1" x="34.7762" y="128" width="44.5668" height="96"/>
  </objectgroup>
 </map>

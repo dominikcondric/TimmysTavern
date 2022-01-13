@@ -1,7 +1,6 @@
 package com.gdx.game;
 
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -16,7 +15,7 @@ public class TimmysTavern extends Game {
 	public void create () {
 		batch = new SpriteBatch();
 		font = new BitmapFont(false);
-		cookbook = new Cookbook(Gdx.files.internal("Cookbook.xml"));
+		cookbook = new Cookbook();
 		this.setScreen(new MainMenuScreen(this));
 	}
 

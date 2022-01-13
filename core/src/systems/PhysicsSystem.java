@@ -7,16 +7,15 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+//import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
-import components.CameraComponent;
+//import components.CameraComponent;
 import components.PhysicsComponent;
 import components.SpriteComponent;
 import scripts.Script;
@@ -26,8 +25,8 @@ public class PhysicsSystem extends EntitySystem implements ContactListener, Disp
 	private ComponentMapper<SpriteComponent> spriteCompMapper;
 	private ComponentMapper<PhysicsComponent> physicsCompMapper;
 	private Family physicsFamily = Family.all(PhysicsComponent.class, SpriteComponent.class).get();
-	private Family cameraFamily = Family.all(CameraComponent.class).get();
-	private Box2DDebugRenderer debugRenderer;
+//	private Family cameraFamily = Family.all(CameraComponent.class).get();
+//	private Box2DDebugRenderer debugRenderer;
 	
 	public PhysicsSystem(Vector2 gravity, int priority) {
 		super(priority);
@@ -35,7 +34,7 @@ public class PhysicsSystem extends EntitySystem implements ContactListener, Disp
 		spriteCompMapper = ComponentMapper.getFor(SpriteComponent.class);
 		physicsCompMapper = ComponentMapper.getFor(PhysicsComponent.class);
 		b2dWorld.setContactListener(this);
-		debugRenderer = new Box2DDebugRenderer();
+//		debugRenderer = new Box2DDebugRenderer();
 	}
 	
 	@Override
@@ -52,7 +51,7 @@ public class PhysicsSystem extends EntitySystem implements ContactListener, Disp
 			}
 		}
 		
-		debugRenderer.render(b2dWorld, getEngine().getEntitiesFor(cameraFamily).get(0).getComponent(CameraComponent.class).camera.combined);
+//		debugRenderer.render(b2dWorld, getEngine().getEntitiesFor(cameraFamily).get(0).getComponent(CameraComponent.class).camera.combined);
 	}
 	
 	public Body createBody(BodyDef bodyDef) {

@@ -160,6 +160,22 @@ public class PlayerScript extends Script {
 			for (Ingredient i : activeReceipt.ingredients) {
 				updateInventory(i.item, inventory.get(i.item.name).itemCount - i.amount);
 			}
+		} else if (eventName == "TakeMeal") {
+			Recipe activeReceipt = ((CookerScript)scriptComponentMapper.get(sender).script).activeRecipe;
+			Item mealItem = new Item(activeReceipt.name, "", activeReceipt.texture.getTextureData().toString(), 0, 0, 32, 32); 
+			InventorySlot slot = inventory.get(mealItem.name);
+			int newAmount = slot == null ? 1 : slot.itemCount + 1;
+			updateInventory(mealItem, newAmount);
+		} else if (eventName == "NPCMealTake") {
+			NPCCustomerScript npcScript = (NPCCustomerScript)scriptComponentMapper.get(sender).script;
+			Item mealName = npcScript.orderedRecipe;
+			InventorySlot slot = inventory.get(mealName.name);
+			if (slot == null) {
+				return;
+			} else { 
+				updateInventory(mealName, inventory.get(mealName.name).itemCount - 1);
+				npcScript.orderedRecipe = null;
+			}
 		}
 	}
 	

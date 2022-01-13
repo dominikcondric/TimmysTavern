@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Item {
-	Item(String name, String guiName, String texturePath, int x, int y, int w, int h) {
+	public Item(String name, String guiName, String texturePath, int x, int y, int w, int h) {
 		this.name = name;
 		this.guiName = guiName;
 		this.texturePath = texturePath;
@@ -15,7 +15,7 @@ public class Item {
 		this.textureHeight = h;
 	}
 	
-	Item(Item other) {
+	public Item(Item other) {
 		this.name = other.name;
 		this.guiName = other.guiName;
 		this.texturePath = other.texturePath;

@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 
 import components.CameraComponent;
-import components.AddEntityComponent;
 import components.PhysicsComponent;
 import components.ScriptComponent;
 

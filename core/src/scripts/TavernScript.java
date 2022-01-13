@@ -23,7 +23,7 @@ import components.ScriptComponent;
 import components.SpriteComponent;
 
 public class TavernScript extends Script {
-	private Entity[] activeNPCs;
+	private Entity randomNPC = null;
 	private final int MAX_CUSTOMERS = 8;
 	private int activeNPCCount = 0;
 	private float timeToNextNPC = 0.f;
@@ -35,7 +35,6 @@ public class TavernScript extends Script {
 
 	public TavernScript(Entity selfEntity) {
 		super(selfEntity);
-		activeNPCs = new Entity[MAX_CUSTOMERS];
 		randomNumberGenerator = new Random();
 		timeToNextNPC = 0.f + randomNumberGenerator.nextFloat() * 10.f;
 	}
@@ -43,11 +42,10 @@ public class TavernScript extends Script {
 	@Override
 	public void update(float deltaTime) {
 		if (tavernOpen) {
-			if (!shouldTakeOrder) {
+			if (!shouldTakeOrder && activeNPCCount < MAX_CUSTOMERS) {
 				timeToNextNPC -= deltaTime;
 				if (timeToNextNPC <= 0.f) {
-					Entity randomNPC = generateRandomNPC();
-					activeNPCs[activeNPCCount] = randomNPC;
+					randomNPC = generateRandomNPC();
 					shouldTakeOrder = true;
 					AddEntityComponent addEntityComp = self.getComponent(AddEntityComponent.class); 
 					addEntityComp.entitiesToAdd.clear();
@@ -55,8 +53,6 @@ public class TavernScript extends Script {
 					addEntityComp.load = true;
 					timeToNextNPC = 0.f + randomNumberGenerator.nextFloat() * 10.f;
 				}
-			} else {
-				
 			}
 		}
 	}
@@ -110,10 +106,20 @@ public class TavernScript extends Script {
 		destroyEntityComp.disposeResources = true;
 		self.getComponent(ScriptComponent.class).eventsToDispatch.add("BorrowWorld");
 		
-		((ScriptComponent)npc.addAndReturn(new ScriptComponent(new NPCCustomerScript(npc, "Pita od jabuka")))).eventsToListen.add("SceneChanged");
+		((ScriptComponent)npc.addAndReturn(new ScriptComponent(new NPCCustomerScript(npc)))).eventsToListen.add("SceneChanged");
 		
 		
 		return npc;
+	}
+
+	
+	
+	@Override
+	public void onEventReceived(Entity sender, String eventName) {
+		if (eventName.contentEquals("NPCMealTake")) {
+			shouldTakeOrder = false;
+			activeNPCCount--;
+		}
 	}
 
 	@Override
@@ -123,7 +129,7 @@ public class TavernScript extends Script {
 			self.getComponent(ScriptComponent.class).eventsToDispatch.remove(eventName);
 			World world = receiver.getComponent(PhysicsComponent.class).body.getWorld();
 			
-			SpriteComponent spriteComp = activeNPCs[activeNPCCount].getComponent(SpriteComponent.class);
+			SpriteComponent spriteComp = randomNPC.getComponent(SpriteComponent.class);
 			
 			BodyDef bodyDef = new BodyDef();
 			bodyDef.position.set(spriteComp.position.x + spriteComp.getSpriteSize().x / 2.f, spriteComp.position.y + spriteComp.getSpriteSize().y / 2.f);
@@ -137,9 +143,10 @@ public class TavernScript extends Script {
 			fixtureDef.isSensor = true;
 			fixtureDef.filter.categoryBits = EntityBits.INTERACTABLE_B2D_BIT;
 			fixtureDef.filter.maskBits = EntityBits.PLAYER_B2D_BIT;
-			body.createFixture(fixtureDef).setUserData(activeNPCs[activeNPCCount].getComponent(ScriptComponent.class).script);
+			body.createFixture(fixtureDef).setUserData(randomNPC.getComponent(ScriptComponent.class).script);
 			
-			activeNPCs[activeNPCCount].add(new PhysicsComponent(body));
+			randomNPC.add(new PhysicsComponent(body));
+			randomNPC = null;
 			activeNPCCount++;
 		}
 	}
