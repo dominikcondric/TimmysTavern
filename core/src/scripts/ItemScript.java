@@ -12,15 +12,16 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
+import com.gdx.game.Item;
 import com.gdx.game.TimmysTavern;
 
 import components.EntityBits;
 import components.GuiComponent;
-import components.ItemComponent;
 import components.ScriptComponent;
 import components.SoundComponent;
 
 public class ItemScript extends Script {
+	Item item;
 	private final int maxItems;
 	private int itemsAvailable;
 	private boolean pickable = false;
@@ -29,8 +30,9 @@ public class ItemScript extends Script {
 	private ComponentMapper<SoundComponent> soundCompMapper = ComponentMapper.getFor(SoundComponent.class);
 	private ComponentMapper<ScriptComponent> scriptCompMapper = ComponentMapper.getFor(ScriptComponent.class);
 	
-	public ItemScript(Entity self, final int maxFruits, final float timeToNextFruitGrow) {
+	public ItemScript(Entity self, Item item, final int maxFruits, final float timeToNextFruitGrow) {
 		super(self);
+		this.item = item;
 		this.maxItems = maxFruits;
 		itemsAvailable = maxFruits;
 		this.timeToNextItemAppear = timeToNextFruitGrow;
@@ -45,7 +47,7 @@ public class ItemScript extends Script {
 		borderImage.setFillParent(true);
 		guiComp.actors.addActor(borderImage);
 		
-		Label label = new Label("Pritisni ENTER da uzmes predmet: " + self.getComponent(ItemComponent.class).item.guiName, new LabelStyle(TimmysTavern.font, Color.WHITE));
+		Label label = new Label("Pritisni ENTER da uzmes predmet: " + item.guiName, new LabelStyle(TimmysTavern.font, Color.WHITE));
 		label.setFillParent(true);
 		label.setFontScale(2.f);
 		label.setWrap(true);

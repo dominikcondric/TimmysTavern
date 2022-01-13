@@ -36,6 +36,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.gdx.game.Cookbook;
 import com.gdx.game.Item;
 import com.gdx.game.TimmysTavern;
 
@@ -45,7 +46,6 @@ import components.CameraComponent;
 import components.DestroyEntityComponent;
 import components.EntityBits;
 import components.GuiComponent;
-import components.ItemComponent;
 import components.MapComponent;
 import components.MusicComponent;
 import components.PhysicsComponent;
@@ -363,8 +363,7 @@ public class GameScreen implements Screen {
 				}
 				case "apple":
 				{
-					interactable.add(new ItemComponent(Item.APPLE));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 20, 60.f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("apple"), 20, 60.f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = true;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -373,8 +372,7 @@ public class GameScreen implements Screen {
 				}
 				case "cranberry":
 				{
-					interactable.add(new ItemComponent(Item.CRANBERRY));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("cranberry"), 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = true;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -383,8 +381,7 @@ public class GameScreen implements Screen {
 				}
 				case "blueberry":
 				{
-					interactable.add(new ItemComponent(Item.BLUEBERRY));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("blueberry"), 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = true;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -393,8 +390,7 @@ public class GameScreen implements Screen {
 				}
 				case "tomato":
 				{
-					interactable.add(new ItemComponent(Item.TOMATO));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 20, 60.f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("tomato"), 20, 60.f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = false;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -403,8 +399,7 @@ public class GameScreen implements Screen {
 				}
 				case "tuna":
 				{
-					interactable.add(new ItemComponent(Item.TUNA));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("tuna"), 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = true;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -413,8 +408,7 @@ public class GameScreen implements Screen {
 				}
 				case "eggplant":
 				{
-					interactable.add(new ItemComponent(Item.EGGPLANT));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("eggplant"), 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = true;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -423,8 +417,7 @@ public class GameScreen implements Screen {
 				}
 				case "pepper":
 				{
-					interactable.add(new ItemComponent(Item.PEPPER));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 20, 60.f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("pepper"), 20, 60.f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = false;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -433,8 +426,7 @@ public class GameScreen implements Screen {
 				}
 				case "broccoli":
 				{
-					interactable.add(new ItemComponent(Item.BROCCOLI));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("broccoli"), 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = false;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -443,8 +435,7 @@ public class GameScreen implements Screen {
 				}
 				case "carrot":
 				{
-					interactable.add(new ItemComponent(Item.CARROT));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("carrot"), 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = false;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -453,8 +444,7 @@ public class GameScreen implements Screen {
 				}
 				case "trout":
 				{
-					interactable.add(new ItemComponent(Item.TROUT));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("trout"), 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = true;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -463,8 +453,7 @@ public class GameScreen implements Screen {
 				}
 				case "corn":
 				{
-					interactable.add(new ItemComponent(Item.CORN));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("corn"), 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = false;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -473,8 +462,7 @@ public class GameScreen implements Screen {
 				}
 				case "potato":
 				{
-					interactable.add(new ItemComponent(Item.POTATO));
-					interactable.add(new ScriptComponent(new ItemScript(interactable, 40, 10f)));
+					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("potato"), 40, 10f)));
 					SoundComponent itemSoundComp = new SoundComponent(); 
 					fixtureDef.isSensor = false;
 					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
@@ -574,9 +562,6 @@ public class GameScreen implements Screen {
 				case "Cooker1":
 				case "Cooker2":
 				{
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
 					interactable.add(new ScriptComponent(new CookerScript(interactable)));
 					body.createFixture(fixtureDef).setUserData(interactable.getComponent(ScriptComponent.class).script);
 					break;
@@ -629,8 +614,18 @@ public class GameScreen implements Screen {
 	@Override
 	public void dispose() {
 		ecs.removeAllEntities();
+		for (Entity e : ecs.getEntities()) {
+			for (Component c : e.getComponents()) {
+				if (c instanceof Disposable) {
+					((Disposable) c).dispose();
+				}
+			}
+		}
 		
 		for (Entity e : villageEntities) {
+			if (e.isScheduledForRemoval())
+				continue;
+			
 			for (Component c : e.getComponents()) {
 				if (c instanceof Disposable) {
 					((Disposable) c).dispose();
@@ -639,6 +634,9 @@ public class GameScreen implements Screen {
 		}
 		
 		for (Entity e : tavernEntities) {
+			if (e.isScheduledForRemoval())
+				continue;
+			
 			for (Component c : e.getComponents()) {
 				if (c instanceof Disposable) {
 					((Disposable) c).dispose();
@@ -652,5 +650,4 @@ public class GameScreen implements Screen {
 			}
 		}
 	}
-
 }

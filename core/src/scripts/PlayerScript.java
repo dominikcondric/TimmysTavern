@@ -12,22 +12,20 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.gdx.game.Cookbook.Ingredient;
+import com.gdx.game.Cookbook.Recipe;
 import com.gdx.game.Item;
 
 import components.AnimationComponent;
 import components.GuiComponent;
-import components.ItemComponent;
 import components.PhysicsComponent;
 import components.ScriptComponent;
 import components.SoundComponent;
-import scripts.CookerScript.Ingredient;
-import scripts.CookerScript.Recipe;
 
 public class PlayerScript extends Script {
 	private int lastMovingDirection = Keys.DOWN;
 	private ComponentMapper<PhysicsComponent> physicsComponentMapper = ComponentMapper.getFor(PhysicsComponent.class);
 	private ComponentMapper<AnimationComponent> animationComponentMapper = ComponentMapper.getFor(AnimationComponent.class);
-	private ComponentMapper<ItemComponent> itemComponentMapper = ComponentMapper.getFor(ItemComponent.class);
 	private ComponentMapper<GuiComponent> guiComponentMapper = ComponentMapper.getFor(GuiComponent.class);
 	private ComponentMapper<SoundComponent> soundComponentMapper = ComponentMapper.getFor(SoundComponent.class);
 	private ComponentMapper<ScriptComponent> scriptComponentMapper = ComponentMapper.getFor(ScriptComponent.class);
@@ -153,7 +151,7 @@ public class PlayerScript extends Script {
 					break;
 			}
 		} else if (eventName.contentEquals("ItemPicked")) {
-			Item pickedItem = itemComponentMapper.get(sender).item;
+			Item pickedItem = ((ItemScript)scriptComponentMapper.get(sender).script).item;
 			InventorySlot slot = inventory.get(pickedItem.name);
 			int newAmount = slot == null ? 1 : slot.itemCount + 1;
 			updateInventory(pickedItem, newAmount);

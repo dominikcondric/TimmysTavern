@@ -1,6 +1,5 @@
 package scripts;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.badlogic.ashley.core.ComponentMapper;
@@ -8,8 +7,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -20,14 +17,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.gdx.game.Item;
+import com.gdx.game.Cookbook.Ingredient;
+import com.gdx.game.Cookbook.Recipe;
 import com.gdx.game.TimmysTavern;
 
 import components.EntityBits;
@@ -36,10 +33,9 @@ import components.ScriptComponent;
 import components.SoundComponent;
 import scripts.PlayerScript.InventorySlot;
 
-public class CookerScript extends Script implements Disposable {
+public class CookerScript extends Script {
 	private ComponentMapper<GuiComponent> guiCompMapper = ComponentMapper.getFor(GuiComponent.class);
 	private ComponentMapper<ScriptComponent> scriptCompMapper = ComponentMapper.getFor(ScriptComponent.class);
-	private ArrayList<Recipe> meals;
 	private Table recipesList;
 	private Table recipeIngredientList;
 	private ScrollPane recipeListScrollPane;
@@ -57,74 +53,14 @@ public class CookerScript extends Script implements Disposable {
 	private float cookingCounter = 0f;
 	private ImageButton takeMealButton;
 	
-	class Ingredient {
-		Item item;
-		int amount;
-		int timeToCook;
-		
-		Ingredient(Item item, int amount) {
-			this.item = item;
-			this.amount = amount;
-		}
-	}
-	
-	class Recipe {
-		Recipe(String name, int timeToCook, Texture texture) {
-			this.name = name;
-			this.timeToCook = timeToCook;
-			ingredients = new ArrayList<>();
-			this.texture = texture;
-		}
-		
-		final String name;
-		final Texture texture;
-		ArrayList<Ingredient> ingredients;
-		TextButton button;
-		int timeToCook;
-	}
-	
 	public CookerScript(Entity selfEntity) {
 		super(selfEntity);
-		meals = new ArrayList<Recipe>();
 		whiteLabelStyle = new LabelStyle(TimmysTavern.font, Color.WHITE);
 		greenLabelStyle = new LabelStyle(TimmysTavern.font, Color.GREEN);
 		redLabelStyle = new LabelStyle(TimmysTavern.font, Color.RED);
 		cookingCounterLabel = new Label("", whiteLabelStyle);
 		cookingCounterLabel.setFontScale(3.f);
 		cookingCounterLabel.setAlignment(Align.center);
-		
-		Recipe recipe = new Recipe("Pita od jabuka", 10, new Texture(Gdx.files.internal("Ghostpixxells_pixelfood\\05_apple_pie.png")));
-		meals.add(recipe);
-		recipe.ingredients.add(new Ingredient(Item.APPLE, 10));
-//		recipe.ingredients.add(new Ingredient(Item.FLOUR, 20));
-//		recipe.ingredients.add(new Ingredient(Item.SUGAR, 3));
-//		recipe.ingredients.add(new Ingredient(Item.OIL, 5));
-//		recipe.ingredients.add(new Ingredient(Item.WATER, 10));
-//		
-		recipe = new Recipe("Kolac od borovnica i cokolade", 30, new Texture(Gdx.files.internal("Ghostpixxells_pixelfood\\30_chocolatecake.png")));
-		meals.add(recipe);
-		recipe.ingredients.add(new Ingredient(Item.BLUEBERRY, 40));
-		recipe.ingredients.add(new Ingredient(Item.FLOUR, 20));
-		recipe.ingredients.add(new Ingredient(Item.WATER, 5));
-		recipe.ingredients.add(new Ingredient(Item.OIL, 10));
-		recipe.ingredients.add(new Ingredient(Item.BAKING_POWDER, 2));
-		
-		recipe = new Recipe("Hamburger", 3, new Texture(Gdx.files.internal("Ghostpixxells_pixelfood\\15_burger.png")));
-		meals.add(recipe);
-		recipe.ingredients.add(new Ingredient(Item.BREAD, 40));
-		recipe.ingredients.add(new Ingredient(Item.BEEF, 20));
-		recipe.ingredients.add(new Ingredient(Item.SALAD, 5));
-		recipe.ingredients.add(new Ingredient(Item.KETCHUP, 1));
-		recipe.ingredients.add(new Ingredient(Item.MAYONNAISE, 1));
-		
-		recipe = new Recipe("Govedji gulas", 30, new Texture(Gdx.files.internal("Ghostpixxells_pixelfood\\41_eggsalad_bowl.png")));
-		meals.add(recipe);
-		recipe.ingredients.add(new Ingredient(Item.BEEF, 2));
-		recipe.ingredients.add(new Ingredient(Item.SALT, 2));
-		recipe.ingredients.add(new Ingredient(Item.WATER, 5));
-		recipe.ingredients.add(new Ingredient(Item.TOMATO, 10));
-		recipe.ingredients.add(new Ingredient(Item.OIL, 1));
-		recipe.ingredients.add(new Ingredient(Item.POTATO, 3));
 		
 		final float guiSize = Gdx.graphics.getWidth() / 6.f;
 		final float startX = guiSize / 3f;
@@ -200,10 +136,9 @@ public class CookerScript extends Script implements Disposable {
 			}
 		});
 		
-		for (Recipe r : meals) {
+		for (Recipe r : TimmysTavern.cookbook.getRecipes().values()) {
 			recipesList.row();
 			TextButton tb = new TextButton(r.name, textButtonStyle);
-			r.button = tb;
 			tb.getLabel().setFontScale(2.f);
 			tb.align(Align.center);
 			tb.getLabel().setWrap(true);
@@ -212,8 +147,8 @@ public class CookerScript extends Script implements Disposable {
 
 				@Override
 				public void clicked(InputEvent event, float x, float y) {
-					for (Recipe r : meals) {
-						if (r.button == event.getListenerActor()) {
+					for (Recipe r : TimmysTavern.cookbook.getRecipes().values()) {
+						if (r.name.contentEquals(((TextButton)event.getListenerActor()).getText().toString())) {
 							activeRecipe = r;
 							recipeIngredientList.clear();
 							createIngredientsList();
@@ -354,13 +289,6 @@ public class CookerScript extends Script implements Disposable {
 			recipeIngredientList.add(cookingCounterLabel).grow().center();
 			cookingCounter = activeRecipe.timeToCook;
 			cookable = false;
-		}
-	}
-
-	@Override
-	public void dispose() {
-		for (Recipe r : meals) {
-			r.texture.dispose();
 		}
 	}
 }
