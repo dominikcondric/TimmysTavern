@@ -55,6 +55,7 @@ public class CookerScript extends Script {
 	
 	public CookerScript(Entity selfEntity) {
 		super(selfEntity);
+		
 		whiteLabelStyle = new LabelStyle(TimmysTavern.font, Color.WHITE);
 		greenLabelStyle = new LabelStyle(TimmysTavern.font, Color.GREEN);
 		redLabelStyle = new LabelStyle(TimmysTavern.font, Color.RED);
@@ -208,7 +209,7 @@ public class CookerScript extends Script {
 		}
 		
 		if (cookingCounter < 0.f && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-			scriptCompMapper.get(self).eventsToDispatch.add("TakeMeal");
+			scriptCompMapper.get(self).eventsToDispatch.add("PickItem");
 		}
 	}
 	
@@ -271,14 +272,21 @@ public class CookerScript extends Script {
 			recipeIngredientList.add(cookingCounterLabel).grow().center();
 			cookingCounter = activeRecipe.timeToCook;
 			cookable = false;
-		} else if (eventName == "TakeMeal") {
+		} else if (eventName == "PickItem") {
 			scriptCompMapper.get(self).eventsToDispatch.remove(eventName);
+			scriptCompMapper.get(self).eventsToListen.add("ItemPicked");
+		}
+	}
+
+	@Override
+	public void onEventReceived(Entity sender, String eventName) {
+		if (eventName == "ItemPicked") {
+			scriptCompMapper.get(self).eventsToListen.remove(eventName);
 			cookingCounter = 0.f;
 			recipeIngredientList.clear();
 			recipeIngredientListScrollPane.remove();
 			guiCompMapper.get(self).actors.addActor(recipeListScrollPane);
 			activeRecipe = null;
-			
 		}
 	}
 }

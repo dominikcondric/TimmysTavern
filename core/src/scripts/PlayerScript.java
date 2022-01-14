@@ -1,20 +1,31 @@
 package scripts;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.gdx.game.Cookbook.Ingredient;
 import com.gdx.game.Cookbook.Recipe;
 import com.gdx.game.Item;
+import com.gdx.game.TimmysTavern;
 
 import components.AnimationComponent;
 import components.GuiComponent;
@@ -31,6 +42,7 @@ public class PlayerScript extends Script {
 	private ComponentMapper<ScriptComponent> scriptComponentMapper = ComponentMapper.getFor(ScriptComponent.class);
 	HashMap<String, InventorySlot> inventory;
 	private boolean inventoryOpen = false;
+	private final int MAX_INVENTORY_ITEMS = 25;
 	
 	class InventorySlot {
 		public InventorySlot(int slot, int count) {
@@ -45,6 +57,70 @@ public class PlayerScript extends Script {
 	public PlayerScript(Entity selfEntity) {
 		super(selfEntity);
 		inventory = new HashMap<String, InventorySlot>();
+		
+		GuiComponent playerInventory = new GuiComponent();
+		playerInventory.actors.setVisible(false);
+		Pixmap backgroundBlack = new Pixmap(1, 1, Format.RGBA8888);
+		backgroundBlack.setColor(0.f, 0.f, 0.f, 0.2f);
+		backgroundBlack.fill();
+		Texture borderTexture = new Texture(Gdx.files.internal("InventoryItemBorder.png"));
+		
+		final float inventorySlotSize = Gdx.graphics.getWidth() / 30.f;
+		final float firstImageX = Gdx.graphics.getWidth() - inventorySlotSize * 6;
+		final float firstImageY = Gdx.graphics.getHeight() - inventorySlotSize * 6;
+		
+		TextButtonStyle tbs = new TextButtonStyle();
+		tbs.font = TimmysTavern.font;
+		for (int i = 4; i >= 0; --i) {
+			for (int j = 0; j < 5; ++j) {
+				Group inventoryItemGroup = new Group();
+				inventoryItemGroup.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
+				inventoryItemGroup.setSize(inventorySlotSize, inventorySlotSize);
+				Image border = new Image(borderTexture);
+				border.setFillParent(true);
+				TextButton counter = new TextButton("", tbs);
+				counter.getLabel().setFontScale(1.5f);
+				counter.getLabel().setAlignment(Align.bottomLeft);
+				counter.setFillParent(true);
+				counter.setVisible(false);
+				counter.align(Align.bottomLeft);
+				counter.addListener(new ClickListener(Buttons.RIGHT) {
+					
+					@Override
+					public void clicked(InputEvent event, float x, float y) {
+						TextButton button = (TextButton)event.getListenerActor();
+						Actor parent = button.getParent();
+						Group mainGroup = self.getComponent(GuiComponent.class).actors;
+						int slotIndexToRemove;
+						for (slotIndexToRemove = 0; slotIndexToRemove < MAX_INVENTORY_ITEMS; ++slotIndexToRemove) {
+							if (mainGroup.getChild(slotIndexToRemove) == parent) {
+								break;
+							}
+						}
+						
+						String entryToRemove = null;
+						for (Entry<String, InventorySlot> entry : inventory.entrySet()) {
+							if (entry.getValue().slotNumber == slotIndexToRemove) {
+								entryToRemove = entry.getKey();
+
+							}
+						}
+						
+						Item item = new Item(entryToRemove, "", "", 0, 0, 32, 32);
+						updateInventory(item, 0);
+					}
+					
+				});
+				Image emptyImage = new Image();
+				inventoryItemGroup.addActor(border);
+				inventoryItemGroup.addActor(emptyImage);
+				inventoryItemGroup.addActor(counter);
+				playerInventory.actors.addActor(inventoryItemGroup);
+			}
+		}
+		
+		backgroundBlack.dispose();
+		self.add(playerInventory);
 	}
 	
 	@Override
@@ -150,22 +226,28 @@ public class PlayerScript extends Script {
 					animationComponentMapper.get(self).setActiveAnimation("IdleUp", false);
 					break;
 			}
-		} else if (eventName.contentEquals("ItemPicked")) {
-			Item pickedItem = ((ItemScript)scriptComponentMapper.get(sender).script).item;
+		} else if (eventName.contentEquals("PickItem")) {
+			Script script = scriptComponentMapper.get(sender).script;
+			Item pickedItem = null;
+			if (script instanceof CookerScript) {
+				Recipe r = ((CookerScript) script).activeRecipe;
+				pickedItem = new Item(r.name, "", r.texture.getTextureData().toString(), 0, 0, 32, 32);
+			} else if (script instanceof ItemScript) {
+				pickedItem = ((ItemScript) script).item;
+			}
+			
 			InventorySlot slot = inventory.get(pickedItem.name);
+			if (inventory.size() == MAX_INVENTORY_ITEMS && slot == null) {
+				return;
+			}
 			int newAmount = slot == null ? 1 : slot.itemCount + 1;
 			updateInventory(pickedItem, newAmount);
+			scriptComponentMapper.get(self).eventsToDispatch.add("ItemPicked");
 		} else if (eventName == "CookingStarted") {
 			Recipe activeReceipt = ((CookerScript)scriptComponentMapper.get(sender).script).activeRecipe;
 			for (Ingredient i : activeReceipt.ingredients) {
 				updateInventory(i.item, inventory.get(i.item.name).itemCount - i.amount);
 			}
-		} else if (eventName == "TakeMeal") {
-			Recipe activeReceipt = ((CookerScript)scriptComponentMapper.get(sender).script).activeRecipe;
-			Item mealItem = new Item(activeReceipt.name, "", activeReceipt.texture.getTextureData().toString(), 0, 0, 32, 32); 
-			InventorySlot slot = inventory.get(mealItem.name);
-			int newAmount = slot == null ? 1 : slot.itemCount + 1;
-			updateInventory(mealItem, newAmount);
 		} else if (eventName == "NPCMealTake") {
 			NPCCustomerScript npcScript = (NPCCustomerScript)scriptComponentMapper.get(sender).script;
 			Item mealName = npcScript.orderedRecipe;
@@ -179,22 +261,26 @@ public class PlayerScript extends Script {
 		}
 	}
 	
+	@Override
+	public void onEventResponse(Entity receiver, String eventName) {
+		if (eventName == "ItemPicked") {
+			scriptComponentMapper.get(self).eventsToDispatch.remove(eventName);
+		}
+	}
+
 	private void updateInventory(Item updatingItem, int newAmount) {
 		GuiComponent inventoryGui = guiComponentMapper.get(self);
 		if (inventory.containsKey(updatingItem.name)) {
 			InventorySlot slot = inventory.get(updatingItem.name);
 			slot.itemCount = newAmount;
-			Label slotLabel = (Label)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(2);
+			TextButton slotLabel = (TextButton)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(2);
 			if (slot.itemCount == 0) {
 				slotLabel.setVisible(false);
 				Image itemImage = (Image)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(1);
 				((TextureRegionDrawable)itemImage.getDrawable()).getRegion().getTexture().dispose();
 				itemImage.setDrawable(null);
 				inventory.remove(updatingItem.name);
-			} else if (slot.itemCount == 1) {
-				slotLabel.setVisible(false);
-				slotLabel.setText(Integer.toString(slot.itemCount));
-			} else if (slot.itemCount > 1) {
+			} else if (slot.itemCount >= 1) {
 				slotLabel.setVisible(true);
 				slotLabel.setText(Integer.toString(slot.itemCount));
 			}
@@ -203,6 +289,9 @@ public class PlayerScript extends Script {
 			inventory.put(updatingItem.name, new InventorySlot(inventory.size(), newAmount));
 			Image itemImage = (Image)inventorySlot.getChild(1);
 			Image borderImage =  (Image)inventorySlot.getChild(0);
+			TextButton counter = (TextButton)inventorySlot.getChild(2);
+			counter.setVisible(true);
+			counter.setText("1");
 			itemImage.setPosition(borderImage.getX(), borderImage.getY());
 			itemImage.setSize(borderImage.getWidth(), borderImage.getHeight());
 			itemImage.setDrawable(new TextureRegionDrawable(updatingItem.getTextureRegion()));

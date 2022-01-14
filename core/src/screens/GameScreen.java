@@ -175,7 +175,7 @@ public class GameScreen implements Screen {
 		
 		ScriptComponent playerScriptComponent = new ScriptComponent(new PlayerScript(player));
 		playerScriptComponent.eventsToListen.add("SceneChanged");
-		playerScriptComponent.eventsToListen.add("ItemPicked");
+		playerScriptComponent.eventsToListen.add("PickItem");
 		playerScriptComponent.eventsToListen.add("StartItemChecking");
 		playerScriptComponent.eventsToListen.add("CookingStarted");
 		playerScriptComponent.eventsToListen.add("BorrowWorld");
@@ -201,44 +201,6 @@ public class GameScreen implements Screen {
 		body.createFixture(fixtureDef).setUserData(playerScriptComponent.script);
 		shape.dispose();
 		player.add(new PhysicsComponent(body));
-		
-		GuiComponent playerInventory = new GuiComponent();
-		playerInventory.actors.setVisible(false);
-		Pixmap backgroundBlack = new Pixmap(1, 1, Format.RGBA8888);
-		backgroundBlack.setColor(0.f, 0.f, 0.f, 0.2f);
-		backgroundBlack.fill();
-		Texture borderTexture = new Texture(Gdx.files.internal("InventoryItemBorder.png"));
-		LabelStyle labelStyle = new LabelStyle(TimmysTavern.font, Color.WHITE);
-		
-		final float stageWidth = ecs.getSystem(RenderingSystem.class).ui.getWidth();
-		final float stageHeight = ecs.getSystem(RenderingSystem.class).ui.getHeight();
-		
-		final float inventorySlotSize = stageWidth / 30.f;
-		final float firstImageX = stageWidth - inventorySlotSize * 6;
-		final float firstImageY = stageHeight - inventorySlotSize * 6;
-		
-		for (int i = 4; i >= 0; --i) {
-			for (int j = 0; j < 5; ++j) {
-				Group inventoryItemGroup = new Group();
-				inventoryItemGroup.setPosition(firstImageX + j * inventorySlotSize, firstImageY + i * inventorySlotSize);
-				inventoryItemGroup.setSize(inventorySlotSize, inventorySlotSize);
-				Image border = new Image(borderTexture);
-				border.setFillParent(true);
-				Label label = new Label("", labelStyle);
-				label.setFillParent(true);
-				label.setVisible(false);
-				label.setAlignment(Align.bottomLeft);
-				label.setFontScale(2.f);
-				Image emptyImage = new Image();
-				inventoryItemGroup.addActor(border);
-				inventoryItemGroup.addActor(emptyImage);
-				inventoryItemGroup.addActor(label);
-				playerInventory.actors.addActor(inventoryItemGroup);
-			}
-		}
-		
-		backgroundBlack.dispose();
-		player.add(playerInventory);
 		
 		SoundComponent playerSoundComp = new SoundComponent();
 		playerSoundComp.addSound("inventoryOpen", Gdx.files.internal("RPGsounds_Kenney\\OGG\\bookOpen.ogg"), false, false);
@@ -354,7 +316,7 @@ public class GameScreen implements Screen {
 			
 			switch (object.getName()) {
 				case "TavernDoor":
-				{
+				{	
 					interactable.add(new ScriptComponent(new DoorScript(interactable, "tavern")));
 					AddEntityComponent addEntityComp = (AddEntityComponent)interactable.addAndReturn(new AddEntityComponent());
 					newSceneComps.add(addEntityComp);

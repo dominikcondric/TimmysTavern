@@ -62,9 +62,8 @@ public class ItemScript extends Script {
 	@Override
 	public void update(float deltaTime) {
 		if (pickable && itemsAvailable > 0 && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-			scriptCompMapper.get(self).eventsToDispatch.add("ItemPicked");
-			soundCompMapper.get(self).getSoundEffect("ItemPicked").shouldPlay = true;
-			--itemsAvailable;
+			scriptCompMapper.get(self).eventsToDispatch.add("PickItem");
+			scriptCompMapper.get(self).eventsToListen.add("ItemPicked");
 		}
 		
 		newItemTimer += deltaTime;
@@ -74,6 +73,15 @@ public class ItemScript extends Script {
 		}
 	}
 	
+	@Override
+	public void onEventReceived(Entity sender, String eventName) {
+		if (eventName == "ItemPicked") {
+			scriptCompMapper.get(self).eventsToListen.remove(eventName);
+			soundCompMapper.get(self).getSoundEffect("ItemPicked").shouldPlay = true;
+			--itemsAvailable;
+		}
+	}
+
 	@Override
 	public void onCollisionEnd(Contact contact, Fixture self, Fixture other) {
 		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
@@ -92,6 +100,6 @@ public class ItemScript extends Script {
 
 	@Override
 	public void onEventResponse(Entity receiver, String eventName) {
-		scriptCompMapper.get(self).eventsToDispatch.remove("ItemPicked");
+		scriptCompMapper.get(self).eventsToDispatch.remove("PickItem");
 	}
 }
