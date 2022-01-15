@@ -139,12 +139,12 @@ public class TavernScript extends Script {
 			SpriteComponent spriteComp = randomNPC.getComponent(SpriteComponent.class);
 			
 			BodyDef bodyDef = new BodyDef();
-			bodyDef.position.set(spriteComp.position.x + spriteComp.getSpriteSize().x / 2.f, spriteComp.position.y + spriteComp.getSpriteSize().y / 8.f);
+			bodyDef.position.set(spriteComp.position.x + spriteComp.getSpriteSize().x / 2.f, spriteComp.position.y + spriteComp.getSpriteSize().y / 2.f);
 			bodyDef.type = BodyType.StaticBody;
 			Body body = world.createBody(bodyDef);
 			
 			PolygonShape polyShape = new PolygonShape();
-			polyShape.setAsBox(spriteComp.getSpriteSize().x / 4.f, spriteComp.getSpriteSize().y / 8.f, new Vector2(0.f, -spriteComp.getSpriteSize().y / 2.f), 0.f);
+			polyShape.setAsBox(spriteComp.getSpriteSize().x / 4.f, spriteComp.getSpriteSize().y / 8.f, new Vector2(0.f, -spriteComp.getSpriteSize().y / 3.f), 0.f);
 			FixtureDef fixtureDef = new FixtureDef();
 			fixtureDef.shape = polyShape;
 			fixtureDef.filter.categoryBits = EntityBits.INTERACTABLE_B2D_BIT;
