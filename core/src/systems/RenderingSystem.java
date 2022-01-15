@@ -1,6 +1,5 @@
 package systems;
 
-
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -31,7 +30,7 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 	private ComponentMapper<CameraComponent> camCompMapper = ComponentMapper.getFor(CameraComponent.class);
 	private SpriteBatch batch;
 	private OrthogonalTiledMapRenderer mapRenderer;
-	public Stage ui; 
+	public Stage ui;
 	
 	public RenderingSystem(SpriteBatch batch, int priority) {
 		super(priority);

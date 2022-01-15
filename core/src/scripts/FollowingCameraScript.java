@@ -62,6 +62,10 @@ public class FollowingCameraScript extends Script {
 					xLimits.y = 100.f;
 					yLimits.y = 75.f;
 					break;
+				case "shop":
+					xLimits.y = 30.f;
+					yLimits.y = 20.f;
+					break;
 			}
 		}
 	}

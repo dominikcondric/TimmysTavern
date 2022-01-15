@@ -25,10 +25,15 @@ import components.SpriteComponent;
 public class NPCCustomerScript extends Script {
 	Item orderedRecipe;
 	private boolean recipeTakeable = false;
+	private float timeToEat;
+	final int seatIndex;
 	
-	public NPCCustomerScript(Entity selfEntity) {
+	public NPCCustomerScript(Entity selfEntity, int seatIndex) {
 		super(selfEntity);
+		this.seatIndex = seatIndex;
 		orderedRecipe = TimmysTavern.cookbook.getRandomRecipeItem();
+		
+		timeToEat = 10f + (float)(Math.random()) * 10.f;
 		
 		GuiComponent guiComp = self.getComponent(GuiComponent.class);
 		if (guiComp == null) {
@@ -58,17 +63,21 @@ public class NPCCustomerScript extends Script {
 			if (recipeTakeable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
 				self.getComponent(ScriptComponent.class).eventsToDispatch.add("NPCMealTake");
 				recipeTakeable = false;
+				((Label)self.getComponent(GuiComponent.class).actors.getChild(1)).setText("Hvala vam!");
 			}
-		} else {
-			self.getComponent(DestroyEntityComponent.class).destroy = true;
-		}
+		} else if (timeToEat > 0f) {
+			timeToEat -= deltaTime;
+			if (timeToEat < 0f) {
+				self.getComponent(ScriptComponent.class).eventsToDispatch.add("NPCLeft");
+			}
+		} 
 	}
 
 	@Override
 	public void onCollisionBegin(Contact contact, Fixture self, Fixture other) {
 		if ((other.getFilterData().categoryBits & EntityBits.PLAYER_B2D_BIT) != 0) {
 			this.self.getComponent(GuiComponent.class).actors.setVisible(true);
-			if (((PlayerScript)other.getUserData()).inventory.containsKey(orderedRecipe.name))
+			if (orderedRecipe != null && ((PlayerScript)other.getUserData()).inventory.containsKey(orderedRecipe.name))
 				recipeTakeable = true;
 		}
 	}
@@ -84,10 +93,18 @@ public class NPCCustomerScript extends Script {
 	@Override
 	public void onEventReceived(Entity sender, String eventName) {
 		if (eventName == "SceneChanged") {
-			Body body = self.getComponent(PhysicsComponent.class).body;
-			body.setActive(!body.isActive());
-			SpriteComponent spriteComp = self.getComponent(SpriteComponent.class); 
-			spriteComp.draw = !spriteComp.draw;
+			String sceneName = ((DoorScript)sender.getComponent(ScriptComponent.class).script).newSceneName;
+			if (sceneName.contentEquals("tavern")) {
+				Body body = self.getComponent(PhysicsComponent.class).body;
+				body.setActive(true);
+				SpriteComponent spriteComp = self.getComponent(SpriteComponent.class); 
+				spriteComp.draw = true;
+			} else {
+				Body body = self.getComponent(PhysicsComponent.class).body;
+				body.setActive(false);
+				SpriteComponent spriteComp = self.getComponent(SpriteComponent.class); 
+				spriteComp.draw = false;
+			}
 		}
 	}
 
@@ -95,6 +112,9 @@ public class NPCCustomerScript extends Script {
 	public void onEventResponse(Entity receiver, String eventName) {
 		if (eventName == "NPCMealTake") {
 			self.getComponent(ScriptComponent.class).eventsToDispatch.remove(eventName);
+		} else if (eventName == "NPCLeft") {
+			self.getComponent(ScriptComponent.class).eventsToDispatch.remove(eventName);
+			self.getComponent(DestroyEntityComponent.class).destroy = true;
 		}
 	}
 }

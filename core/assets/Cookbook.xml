@@ -13,9 +13,8 @@
 		<ingredient name="water"  guiName="Voda" textureFile="Pixel_Mart\\water.png"/>
 		<ingredient name="bakingPowder"  guiName="Prasak za pecivo" textureFile="Pixel_Mart\\baking_powder.png"/>
 		<ingredient name="pork"  guiName="Svinjetina" textureFile="Pixel_Mart\\meat1.png"/>
-		<ingredient name="lamb"  guiName="Janjetina" textureFile="Pixel_Mart\\meat1_p.png"/>
 		<ingredient name="beef"  guiName="Govedina" textureFile="Pixel_Mart\\meat2.png"/>
-		<ingredient name="chicken"  guiName="Piletina" textureFile="Pixel_Mart\\meat3.png"/>
+		<ingredient name="chicken"  guiName="Piletina" textureFile="Ghostpixxells_pixelfood\\85_roastedchicken.png"/>
 		<ingredient name="tuna"  guiName="Tuna" textureFile="Pixel_Mart\\fish.png"/>
 		<ingredient name="trout"  guiName="Pastrva" textureFile="Pixel_Mart\\salmon.png"/>
 		<ingredient name="ketchup"  guiName="Kecap" textureFile="Pixel_Mart\\ketchup.png"/>
@@ -36,6 +35,10 @@
 		<ingredient name="ham"  guiName="Sunka" textureFile="Pixel_Mart\\sausage_p.png"/>
 		<ingredient name="chocolate"  guiName="Cokolada" textureFile="Ghostpixxells_pixelfood\\26_chocolate.png"/>
 		<ingredient name="milk"  guiName="Mlijeko" textureFile="Pixel_Mart\\milk_pack.png"/>
+		<ingredient name="jam"  guiName="Pekmez" textureFile="Pixel_Mart\\jam_strawberry.png"/>
+		<ingredient name="cocoa"  guiName="Kakao" textureFile="Pixel_Mart\\hot_cocoa_mix.png"/>
+		<ingredient name="strawberry"  guiName="Jagoda" textureFile="farm assets\\Fruits and Vegetables\\Strawberries.png"/>
+		<ingredient name="banana"  guiName="Banana" textureFile="farm assets\\Fruits and Vegetables\\Banana.png"/>
 	</Ingredients>
 
 	<Recipes>

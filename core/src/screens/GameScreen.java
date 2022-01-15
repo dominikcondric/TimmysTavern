@@ -11,10 +11,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
@@ -29,11 +26,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.gdx.game.Item;
@@ -69,6 +61,7 @@ public class GameScreen implements Screen {
 	private Engine ecs;
 	private ArrayList<Entity> villageEntities;
 	private ArrayList<Entity> tavernEntities;
+	private ArrayList<Entity> shopEntities;
 
 	public GameScreen(TimmysTavern game) {
 		this.game = game;
@@ -137,6 +130,7 @@ public class GameScreen implements Screen {
 	private void loadScenes() {
 		villageEntities = new ArrayList<Entity>();
 		tavernEntities = new ArrayList<Entity>();
+		shopEntities = new ArrayList<Entity>();
 		ArrayList<AddEntityComponent> addEntityComps = new ArrayList<AddEntityComponent>();
 		
 		Entity player = new Entity();
@@ -180,6 +174,7 @@ public class GameScreen implements Screen {
 		playerScriptComponent.eventsToListen.add("CookingStarted");
 		playerScriptComponent.eventsToListen.add("BorrowWorld");
 		playerScriptComponent.eventsToListen.add("TakeMeal");
+		playerScriptComponent.eventsToListen.add("NPCLeft");
 		playerScriptComponent.eventsToListen.add("NPCMealTake");
 		playerScriptComponent.eventsToDispatch.add("FollowMe");
 		player.add(playerScriptComponent);
@@ -194,7 +189,7 @@ public class GameScreen implements Screen {
 		
 		FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(playerSize.x / 8.f, playerSize.y / 12.f, new Vector2(0.f, -playerSize.y / 4f - 0.2f), 0.f);
+		shape.setAsBox(playerSize.x / 3.f, playerSize.y / 14.f, new Vector2(0.f, -playerSize.y / 4f - 0.4f), 0.f);
 		fixtureDef.shape = shape;
 		fixtureDef.filter.categoryBits = EntityBits.PLAYER_B2D_BIT;
 		fixtureDef.filter.maskBits = 0xFF;
@@ -219,9 +214,12 @@ public class GameScreen implements Screen {
 		
 		loadVillageEntities(villageEntities, addEntityComps);
 		loadTavernEntities(tavernEntities, addEntityComps);
+		loadShopEntities(shopEntities, addEntityComps);
 		
 		addEntityComps.get(0).entitiesToAdd = tavernEntities;
-		addEntityComps.get(1).entitiesToAdd = villageEntities;
+		addEntityComps.get(1).entitiesToAdd = shopEntities;
+		addEntityComps.get(2).entitiesToAdd = villageEntities;
+		addEntityComps.get(3).entitiesToAdd = villageEntities;
 		
 		ecs.addEntity(cameraEntity);
 		ecs.addEntity(player);
@@ -314,123 +312,22 @@ public class GameScreen implements Screen {
 			
 			interactable.add(new PhysicsComponent(body));
 			
-			switch (object.getName()) {
-				case "TavernDoor":
-				{	
-					interactable.add(new ScriptComponent(new DoorScript(interactable, "tavern")));
-					AddEntityComponent addEntityComp = (AddEntityComponent)interactable.addAndReturn(new AddEntityComponent());
-					newSceneComps.add(addEntityComp);
-					fixtureDef.isSensor = true;
-					break;
-				}
-				case "apple":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("apple"), 20, 60.f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = true;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "cranberry":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("cranberry"), 40, 10f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = true;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "blueberry":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("blueberry"), 40, 10f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = true;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "tomato":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("tomato"), 20, 60.f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = false;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "tuna":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("tuna"), 40, 10f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = true;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "eggplant":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("eggplant"), 40, 10f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = true;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "pepper":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("pepper"), 20, 60.f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = false;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "broccoli":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("broccoli"), 40, 10f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = false;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "carrot":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("carrot"), 40, 10f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = false;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "trout":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("trout"), 40, 10f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = true;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "corn":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("corn"), 40, 10f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = false;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
-				case "potato":
-				{
-					interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem("potato"), 40, 10f)));
-					SoundComponent itemSoundComp = new SoundComponent(); 
-					fixtureDef.isSensor = false;
-					itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
-					interactable.add(itemSoundComp);
-					break;
-				}
+			if (TimmysTavern.cookbook.itemExists(object.getName())) {
+				interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem(object.getName()))));
+				SoundComponent itemSoundComp = new SoundComponent(); 
+				fixtureDef.isSensor = true;
+				itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+				interactable.add(itemSoundComp);
+			} else if (object.getName().contentEquals("TavernDoor")) {
+				interactable.add(new ScriptComponent(new DoorScript(interactable, "tavern")));
+				AddEntityComponent addEntityComp = (AddEntityComponent)interactable.addAndReturn(new AddEntityComponent());
+				newSceneComps.add(addEntityComp);
+				fixtureDef.isSensor = true;
+			} else if (object.getName().contentEquals("ShopDoor")) {
+				interactable.add(new ScriptComponent(new DoorScript(interactable, "shop")));
+				AddEntityComponent addEntityComp = (AddEntityComponent)interactable.addAndReturn(new AddEntityComponent());
+				newSceneComps.add(addEntityComp);
+				fixtureDef.isSensor = true;
 			}
 			
 			body.createFixture(fixtureDef).setUserData(interactable.getComponent(ScriptComponent.class).script);
@@ -447,7 +344,10 @@ public class GameScreen implements Screen {
 		mapEntity.add(mapComp);
 		
 		// Script creation
-		((ScriptComponent)mapEntity.addAndReturn(new ScriptComponent(new TavernScript(mapEntity)))).eventsToListen.add("NPCMealTake");
+		ScriptComponent tavernScriptComp = new ScriptComponent(new TavernScript(mapEntity));
+		tavernScriptComp.eventsToListen.add("NPCMealTake");
+		tavernScriptComp.eventsToListen.add("NPCLeft");
+		mapEntity.add(tavernScriptComp);
 		((AddEntityComponent)mapEntity.addAndReturn(new AddEntityComponent())).sceneChange = false;
 	
 		// Background music
@@ -533,6 +433,92 @@ public class GameScreen implements Screen {
 			polyShape.dispose();
 			interactable.add(new DestroyEntityComponent());
 			tavernEntities.add(interactable);
+		}
+	}
+	
+	private void loadShopEntities(ArrayList<Entity> shopEntities, ArrayList<AddEntityComponent> newSceneComps) {
+		Entity mapEntity = new Entity();
+		MapComponent mapComp = new MapComponent("Maps/Shop.tmx");
+		mapEntity.add(mapComp);
+		mapEntity.add(new DestroyEntityComponent());
+		
+		// Background music
+		MusicComponent musicComp = (MusicComponent)mapEntity.addAndReturn(new MusicComponent(Gdx.files.internal("PGS Fantasy RPG Music Pack/Event Music 1.ogg")));
+		musicComp.music.setLooping(true);
+		musicComp.shouldPlay = true;
+		musicComp.music.setVolume(0.2f);
+
+		PhysicsSystem physicsSystem = ecs.getSystem(PhysicsSystem.class);
+		
+		float mapScalingFactor = 1f / mapComp.map.getProperties().get("tilewidth", Integer.class);
+		Vector2 mapSize = mapComp.getMapSize();
+		
+		Body body = null;
+		BodyDef bodyDef = null;
+		FixtureDef fixtureDef = null;
+		PolygonShape polyShape = null;
+		bodyDef = new BodyDef();
+		bodyDef.type = BodyDef.BodyType.StaticBody;
+		bodyDef.position.set(mapSize.x * mapScalingFactor / 2.f, mapSize.y * mapScalingFactor / 2.f);
+		body = physicsSystem.createBody(bodyDef);
+		body.setActive(false);
+		
+		for (MapObject object : mapComp.map.getLayers().get("Obstacles").getObjects().getByType(RectangleMapObject.class)) {
+			Rectangle rect = ((RectangleMapObject)object).getRectangle();
+			rect.set(rect.getX() * mapScalingFactor, rect.getY() * mapScalingFactor, rect.getWidth() * mapScalingFactor, rect.getHeight() * mapScalingFactor);
+			
+			polyShape = new PolygonShape();
+			polyShape.setAsBox(rect.getWidth() / 2f, rect.getHeight() / 2.f, rect.getCenter(new Vector2()).sub(body.getPosition()), 0.f);
+			fixtureDef = new FixtureDef();
+			fixtureDef.shape = polyShape;
+			fixtureDef.filter.categoryBits = EntityBits.OBSTACLE_B2D_BIT;
+			fixtureDef.filter.groupIndex = -EntityBits.STATIC_SCENERY_B2D_GROUP;
+			fixtureDef.filter.maskBits = EntityBits.PLAYER_B2D_BIT;
+			body.createFixture(fixtureDef);
+			polyShape.dispose();
+		}
+		
+		mapEntity.add(new PhysicsComponent(body));
+		shopEntities.add(mapEntity);
+		
+		for (RectangleMapObject object : mapComp.map.getLayers().get("Interactables").getObjects().getByType(RectangleMapObject.class)) {
+			Entity interactable = new Entity();
+			Rectangle rect = object.getRectangle();
+			rect.set(rect.x * mapScalingFactor, rect.y * mapScalingFactor, rect.width * mapScalingFactor, rect.height * mapScalingFactor);
+			bodyDef = new BodyDef();
+			bodyDef.position.set(rect.getX() + rect.getWidth() / 2.f, rect.getY() + rect.getHeight() / 2.f);
+			bodyDef.type = BodyDef.BodyType.StaticBody;
+			body = physicsSystem.createBody(bodyDef);
+			polyShape = new PolygonShape();
+			polyShape.setAsBox(rect.getWidth() / 2f, rect.getHeight() / 2f);
+			fixtureDef = new FixtureDef();
+			fixtureDef.shape = polyShape;
+			fixtureDef.isSensor = true;
+			fixtureDef.filter.categoryBits = EntityBits.INTERACTABLE_B2D_BIT;
+			fixtureDef.filter.groupIndex = -EntityBits.STATIC_SCENERY_B2D_GROUP;
+			fixtureDef.filter.maskBits = EntityBits.PLAYER_B2D_BIT;
+			body.setActive(false);
+			
+			interactable.add(new PhysicsComponent(body));
+			
+			if (TimmysTavern.cookbook.itemExists(object.getName())) {
+				interactable.add(new ScriptComponent(new ItemScript(interactable, TimmysTavern.cookbook.getIngredientItem(object.getName()))));
+				SoundComponent itemSoundComp = new SoundComponent(); 
+				fixtureDef.isSensor = true;
+				itemSoundComp.addSound("ItemPicked", Gdx.files.internal(Item.itemPickingSoundFile), false, false);
+				interactable.add(itemSoundComp);
+				body.createFixture(fixtureDef).setUserData(interactable.getComponent(ScriptComponent.class).script);
+			} else if (object.getName().contentEquals("door")) {
+				DoorScript tavernDoorScript = new DoorScript(interactable, "village");
+				interactable.add(new ScriptComponent(tavernDoorScript));
+				AddEntityComponent addEntityComp = (AddEntityComponent)interactable.addAndReturn(new AddEntityComponent());
+				newSceneComps.add(addEntityComp);
+				body.createFixture(fixtureDef).setUserData(interactable.getComponent(ScriptComponent.class).script);
+			}
+			
+			polyShape.dispose();
+			interactable.add(new DestroyEntityComponent());
+			shopEntities.add(interactable);
 		}
 	}
 	

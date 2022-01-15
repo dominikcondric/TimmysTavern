@@ -22,20 +22,13 @@ import components.SoundComponent;
 
 public class ItemScript extends Script {
 	Item item;
-	private final int maxItems;
-	private int itemsAvailable;
 	private boolean pickable = false;
-	private float newItemTimer = 0.f;
-	private float timeToNextItemAppear;
 	private ComponentMapper<SoundComponent> soundCompMapper = ComponentMapper.getFor(SoundComponent.class);
 	private ComponentMapper<ScriptComponent> scriptCompMapper = ComponentMapper.getFor(ScriptComponent.class);
 	
-	public ItemScript(Entity self, Item item, final int maxFruits, final float timeToNextFruitGrow) {
+	public ItemScript(Entity self, Item item) {
 		super(self);
 		this.item = item;
-		this.maxItems = maxFruits;
-		itemsAvailable = maxFruits;
-		this.timeToNextItemAppear = timeToNextFruitGrow;
 		
 		GuiComponent guiComp = self.getComponent(GuiComponent.class);
 		if (guiComp == null) {
@@ -61,15 +54,9 @@ public class ItemScript extends Script {
 	
 	@Override
 	public void update(float deltaTime) {
-		if (pickable && itemsAvailable > 0 && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
+		if (pickable && Gdx.input.isKeyJustPressed(Keys.ENTER)) {
 			scriptCompMapper.get(self).eventsToDispatch.add("PickItem");
 			scriptCompMapper.get(self).eventsToListen.add("ItemPicked");
-		}
-		
-		newItemTimer += deltaTime;
-		if (newItemTimer >= timeToNextItemAppear) {
-			itemsAvailable = Math.min(itemsAvailable + 1, maxItems);
-			newItemTimer = 0.f;
 		}
 	}
 	
@@ -78,7 +65,6 @@ public class ItemScript extends Script {
 		if (eventName == "ItemPicked") {
 			scriptCompMapper.get(self).eventsToListen.remove(eventName);
 			soundCompMapper.get(self).getSoundEffect("ItemPicked").shouldPlay = true;
-			--itemsAvailable;
 		}
 	}
 

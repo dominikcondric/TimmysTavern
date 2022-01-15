@@ -57,6 +57,10 @@ public class Cookbook implements Disposable {
 		}
 	}
 	
+	public boolean itemExists(String itemName) {
+		return ingredientItemsList.containsKey(itemName);
+	}
+	
 	private void loadIngredientItems(Element root) {
 		for (int i = 0; i < root.getChildCount(); ++i) {
 			Element recipe = root.getChild(i);

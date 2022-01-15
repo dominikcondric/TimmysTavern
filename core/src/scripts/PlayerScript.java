@@ -43,6 +43,7 @@ public class PlayerScript extends Script {
 	HashMap<String, InventorySlot> inventory;
 	private boolean inventoryOpen = false;
 	private final int MAX_INVENTORY_ITEMS = 25;
+	private String activeScene = "tavern";
 	
 	class InventorySlot {
 		public InventorySlot(int slot, int count) {
@@ -217,15 +218,29 @@ public class PlayerScript extends Script {
 		if (eventName.contentEquals("SceneChanged")) {
 			switch (((DoorScript)sender.getComponent(ScriptComponent.class).script).newSceneName) {
 				case "village":
-					physicsComponentMapper.get(self).body.setTransform(new Vector2(49.f, 28.f),  0.f);
-					animationComponentMapper.get(self).setActiveAnimation("IdleDown", false);
+					if (activeScene.contentEquals("tavern")) {
+						physicsComponentMapper.get(self).body.setTransform(new Vector2(49.f, 28.f),  0.f);
+						animationComponentMapper.get(self).setActiveAnimation("IdleDown", false);
+					} else if (activeScene.contentEquals("shop")) {
+						physicsComponentMapper.get(self).body.setTransform(new Vector2(71.f, 35.f),  0.f);
+						animationComponentMapper.get(self).setActiveAnimation("IdleDown", false);
+					}
+					activeScene = "village";
 					break;
 				
 				case "tavern":
 					physicsComponentMapper.get(self).body.setTransform(new Vector2(10.f, 2.f),  0.f);
 					animationComponentMapper.get(self).setActiveAnimation("IdleUp", false);
+					activeScene = "tavern";
+					break;
+					
+				case "shop":
+					physicsComponentMapper.get(self).body.setTransform(new Vector2(3.f, 2.f),  0.f);
+					animationComponentMapper.get(self).setActiveAnimation("IdleUp", false);
+					activeScene = "shop";
 					break;
 			}
+			
 		} else if (eventName.contentEquals("PickItem")) {
 			Script script = scriptComponentMapper.get(sender).script;
 			Item pickedItem = null;
