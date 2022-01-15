@@ -14,6 +14,7 @@ import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 //import components.CameraComponent;
 import components.PhysicsComponent;
@@ -42,7 +43,7 @@ public class PhysicsSystem extends EntitySystem implements ContactListener, Disp
 		b2dWorld.step(deltaTime, 10, 10);
 		for (Entity e : getEngine().getEntitiesFor(physicsFamily)) {
 			PhysicsComponent physicsComp = physicsCompMapper.get(e);
-			if (physicsComp.body != null) {
+			if (physicsComp.body != null && physicsComp.body.getType() != BodyType.StaticBody) {
 				Vector2 bodyPosition = physicsComp.body.getPosition();
 				SpriteComponent spriteComp = spriteCompMapper.get(e);
 				Vector2 spriteSize = spriteComp.getSpriteSize();

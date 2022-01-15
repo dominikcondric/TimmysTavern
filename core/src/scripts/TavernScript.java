@@ -33,7 +33,7 @@ public class TavernScript extends Script {
 	private String[] npcFileNames = { "Generic Children NPCs A.png", "Generic Children NPCs.png", "Generic Female NPCs A.png", "Generic Female NPCs.png",
 			"Generic Male NPCs A.png", "Generic Male NPCs.png" };
 	private final Vector2[] seatPositions = { new Vector2(2.5f, 2f), new Vector2(2.5f, 4f), new Vector2(5.5f, 2f), new Vector2(5.5f, 4f),
-			new Vector2(12.5f, 7f), new Vector2(16f, 7f), new Vector2(12.5f, 4f), new Vector2(16f, 4f)};
+			new Vector2(12.5f, 6.5f), new Vector2(16f, 6.5f), new Vector2(12.5f, 3.5f), new Vector2(16f, 3.5f)};
 	private Stack<Integer> availableSeats;
 	
 	public TavernScript(Entity selfEntity) {

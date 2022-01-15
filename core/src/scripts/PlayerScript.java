@@ -180,7 +180,7 @@ public class PlayerScript extends Script {
 		}
 		
 		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-			body.setLinearVelocity(body.getLinearVelocity().scl(4.f));
+			body.setLinearVelocity(body.getLinearVelocity().scl(3.f));
 		
 		AnimationComponent animationComponent = animationComponentMapper.get(self);
 		if (newMovingDirection != 0 && lastMovingDirection != newMovingDirection) {
