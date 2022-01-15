@@ -149,7 +149,7 @@
   <object id="22" name="salad" x="864" y="416" width="64" height="96"/>
   <object id="23" name="PayingArea" x="704" y="32" width="224" height="128"/>
   <object id="25" name="milk" x="32" y="32" width="64" height="96"/>
-  <object id="26" name="chesse" x="128" y="32" width="64" height="96"/>
+  <object id="26" name="cheese" x="128" y="32" width="64" height="96"/>
   <object id="27" name="chicken" x="256" y="32" width="64" height="96"/>
   <object id="28" name="beef" x="352" y="32" width="64" height="96"/>
   <object id="29" name="pork" x="448" y="32" width="64" height="96"/>

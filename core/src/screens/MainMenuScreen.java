@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
@@ -22,6 +23,8 @@ public class MainMenuScreen implements Screen {
 	private Table menuLayout;
 	private TextButton startGameButton;
 	private TextButton exitGameButton;
+	private Texture backgroundTexture;
+	private Texture gameNameTexture;
 	
 	public MainMenuScreen(TimmysTavern game) {
 		this.game = game;
@@ -30,26 +33,31 @@ public class MainMenuScreen implements Screen {
 		
 		Gdx.input.setInputProcessor(ui);
 		Pixmap buttonBackgroundPixmap = new Pixmap(1, 1, Format.RGB888);
-		buttonBackgroundPixmap.setColor(Color.BLUE);
+		buttonBackgroundPixmap.setColor(Color.DARK_GRAY);
 		buttonBackgroundPixmap.fill();
 		TextureRegionDrawable buttonBackround = new TextureRegionDrawable(new Texture(buttonBackgroundPixmap)); 
 		TextButtonStyle buttonStyle = new TextButtonStyle();
 		buttonStyle.font = TimmysTavern.font;
-		buttonStyle.fontColor = Color.WHITE;
-		buttonStyle.overFontColor = Color.YELLOW;
+		buttonStyle.fontColor = Color.YELLOW;
+		buttonStyle.overFontColor = Color.GOLD;
 		buttonStyle.up = buttonBackround;
 		startGameButton = new TextButton("Start game", buttonStyle);
-		startGameButton.getLabel().setFontScale(2.f);
+		startGameButton.getLabel().setFontScale(4.f);
 		exitGameButton = new TextButton("Exit game", buttonStyle);
-		exitGameButton.getLabel().setFontScale(2.f);
+		exitGameButton.getLabel().setFontScale(4.f);
 		
 		ui.addActor(menuLayout);
 		menuLayout.setFillParent(true);
+		backgroundTexture = new Texture(Gdx.files.internal("MainMenuBackground.png"));
+		menuLayout.setBackground(new TextureRegionDrawable(backgroundTexture));
 		menuLayout.align(Align.center);
 		
 		float buttonHeight = ui.getHeight() / 9.f;
  		
-		menuLayout.row();
+		gameNameTexture = new Texture(Gdx.files.internal("Title.png"));
+		
+		menuLayout.add(new Image(new TextureRegionDrawable(gameNameTexture)));
+		menuLayout.row().spaceBottom(buttonHeight / 3.f).width(ui.getWidth() / 2).height(buttonHeight * 2f);;
 		menuLayout.add(startGameButton).spaceBottom(buttonHeight / 3.f).width(ui.getWidth() / 2).height(buttonHeight * 2f);
 		menuLayout.row();
 		menuLayout.add(exitGameButton).spaceBottom(buttonHeight / 3.f).width(ui.getWidth() / 2).height(buttonHeight * 2f);
@@ -99,6 +107,8 @@ public class MainMenuScreen implements Screen {
 	@Override
 	public void dispose() {
 		ui.dispose();
+		backgroundTexture.dispose();
+		gameNameTexture.dispose();
 	}
 
 	@Override

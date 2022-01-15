@@ -189,7 +189,7 @@ public class GameScreen implements Screen {
 		
 		FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(playerSize.x / 3.f, playerSize.y / 14.f, new Vector2(0.f, -playerSize.y / 4f - 0.4f), 0.f);
+		shape.setAsBox(playerSize.x / 4.f, playerSize.y / 14.f, new Vector2(0.f, -playerSize.y / 4f - 0.4f), 0.f);
 		fixtureDef.shape = shape;
 		fixtureDef.filter.categoryBits = EntityBits.PLAYER_B2D_BIT;
 		fixtureDef.filter.maskBits = 0xFF;

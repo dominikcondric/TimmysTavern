@@ -2,6 +2,7 @@ package scripts;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Stack;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
@@ -43,7 +44,8 @@ public class PlayerScript extends Script {
 	HashMap<String, InventorySlot> inventory;
 	private boolean inventoryOpen = false;
 	private final int MAX_INVENTORY_ITEMS = 25;
-	private String activeScene = "tavern";
+	private String activeScene;
+	private Stack<Integer> availableSlots;
 	
 	class InventorySlot {
 		public InventorySlot(int slot, int count) {
@@ -58,6 +60,9 @@ public class PlayerScript extends Script {
 	public PlayerScript(Entity selfEntity) {
 		super(selfEntity);
 		inventory = new HashMap<String, InventorySlot>();
+		availableSlots = new Stack<>();
+		for (int i = 24; i >= 0; --i)
+			availableSlots.push(i);
 		
 		GuiComponent playerInventory = new GuiComponent();
 		playerInventory.actors.setVisible(false);
@@ -290,6 +295,7 @@ public class PlayerScript extends Script {
 			slot.itemCount = newAmount;
 			TextButton slotLabel = (TextButton)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(2);
 			if (slot.itemCount == 0) {
+				availableSlots.push(slot.slotNumber);
 				slotLabel.setVisible(false);
 				Image itemImage = (Image)((Group)inventoryGui.actors.getChild(slot.slotNumber)).getChild(1);
 				((TextureRegionDrawable)itemImage.getDrawable()).getRegion().getTexture().dispose();
@@ -300,8 +306,9 @@ public class PlayerScript extends Script {
 				slotLabel.setText(Integer.toString(slot.itemCount));
 			}
 		} else {
-			Group inventorySlot = ((Group)inventoryGui.actors.getChild(inventory.size()));
-			inventory.put(updatingItem.name, new InventorySlot(inventory.size(), newAmount));
+			int availableSlot = availableSlots.pop();
+			Group inventorySlot = ((Group)inventoryGui.actors.getChild(availableSlot));
+			inventory.put(updatingItem.name, new InventorySlot(availableSlot, newAmount));
 			Image itemImage = (Image)inventorySlot.getChild(1);
 			Image borderImage =  (Image)inventorySlot.getChild(0);
 			TextButton counter = (TextButton)inventorySlot.getChild(2);

@@ -1,7 +1,7 @@
 package scripts;
 
-import java.util.ArrayList;
 import java.util.Random;
+import java.util.Stack;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
@@ -34,15 +34,15 @@ public class TavernScript extends Script {
 			"Generic Male NPCs A.png", "Generic Male NPCs.png" };
 	private final Vector2[] seatPositions = { new Vector2(2.5f, 2f), new Vector2(2.5f, 4f), new Vector2(5.5f, 2f), new Vector2(5.5f, 4f),
 			new Vector2(12.5f, 7f), new Vector2(16f, 7f), new Vector2(12.5f, 4f), new Vector2(16f, 4f)};
-	private ArrayList<Integer> availableSeats;
+	private Stack<Integer> availableSeats;
 	
 	public TavernScript(Entity selfEntity) {
 		super(selfEntity);
 		randomNumberGenerator = new Random();
 		timeToNextNPC = 10.f + randomNumberGenerator.nextFloat() * 20.f;
-		availableSeats = new ArrayList<Integer>(MAX_CUSTOMERS);
+		availableSeats = new Stack<Integer>();
 		for  (int i = 0; i < MAX_CUSTOMERS; ++i)
-			availableSeats.add(i);
+			availableSeats.push(i);
 	}
 
 	@Override
@@ -92,7 +92,8 @@ public class TavernScript extends Script {
 		final int npcHeight = 120;
 		final int npcWidth = 80;
 		
-		Vector2 npcPosition = seatPositions[availableSeats.get(availableSeats.size() - 1)];
+		int seatIndex = availableSeats.pop();
+		Vector2 npcPosition = seatPositions[seatIndex];
 		
 		int startingY = 1 * npcHeight + npcHeight * (randomNpcTextureIndex / 4) * 4;
 		int startingX = npcWidth + (randomNpcTextureIndex % 4) * npcWidth * 3;
@@ -106,15 +107,14 @@ public class TavernScript extends Script {
 		sprite.setSize(2.5f * npcWHRatio, 2.5f);
 		SpriteComponent spriteComp = (SpriteComponent)npc.addAndReturn(new SpriteComponent(sprite));
 		
-		spriteComp.position.set(seatPositions[availableSeats.get(availableSeats.size() - 1)]);
+		spriteComp.position.set(npcPosition);
 		
 		DestroyEntityComponent destroyEntityComp = (DestroyEntityComponent)npc.addAndReturn(new DestroyEntityComponent());
 		destroyEntityComp.destroyOnSceneChange = false;
 		destroyEntityComp.disposeResources = true;
 		self.getComponent(ScriptComponent.class).eventsToDispatch.add("BorrowWorld");
 		
-		ScriptComponent scriptComp = new ScriptComponent(new NPCCustomerScript(npc, availableSeats.size() - 1));
-		availableSeats.remove(availableSeats.size() - 1);
+		ScriptComponent scriptComp = new ScriptComponent(new NPCCustomerScript(npc, seatIndex));
 		scriptComp.eventsToListen.add("SceneChanged");
 		npc.add(scriptComp);
 		
@@ -125,7 +125,7 @@ public class TavernScript extends Script {
 	public void onEventReceived(Entity sender, String eventName) {
 		if (eventName.contentEquals("NPCLeft")) {
 			--activeNPCCount;
-			availableSeats.add(((NPCCustomerScript)sender.getComponent(ScriptComponent.class).script).seatIndex);
+			availableSeats.push(((NPCCustomerScript)sender.getComponent(ScriptComponent.class).script).seatIndex);
 		}
 	}
 
@@ -139,12 +139,12 @@ public class TavernScript extends Script {
 			SpriteComponent spriteComp = randomNPC.getComponent(SpriteComponent.class);
 			
 			BodyDef bodyDef = new BodyDef();
-			bodyDef.position.set(spriteComp.position.x + spriteComp.getSpriteSize().x / 2.f, spriteComp.position.y + spriteComp.getSpriteSize().y / 2.f);
+			bodyDef.position.set(spriteComp.position.x + spriteComp.getSpriteSize().x / 2.f, spriteComp.position.y + spriteComp.getSpriteSize().y / 8.f);
 			bodyDef.type = BodyType.StaticBody;
 			Body body = world.createBody(bodyDef);
 			
 			PolygonShape polyShape = new PolygonShape();
-			polyShape.setAsBox(spriteComp.getSpriteSize().x / 4.f, spriteComp.getSpriteSize().y / 2.f, new Vector2(0.f, -spriteComp.getSpriteSize().y / 2.f), 0.f);
+			polyShape.setAsBox(spriteComp.getSpriteSize().x / 4.f, spriteComp.getSpriteSize().y / 8.f, new Vector2(0.f, -spriteComp.getSpriteSize().y / 2.f), 0.f);
 			FixtureDef fixtureDef = new FixtureDef();
 			fixtureDef.shape = polyShape;
 			fixtureDef.filter.categoryBits = EntityBits.INTERACTABLE_B2D_BIT;

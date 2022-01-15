@@ -28,8 +28,8 @@
 		<ingredient name="eggplant"  guiName="Patlidzan" textureFile="farm assets\\Fruits and Vegetables\\Aubergine.png"/>
 		<ingredient name="pepper"  guiName="Paprika" textureFile="farm assets\\Fruits and Vegetables\\Pepper Red.png"/>
 		<ingredient name="broccoli"  guiName="Brokula" textureFile="farm assets\\Fruits and Vegetables\\Broccoli.png"/>
-		<ingredient name="pasta"  guiName="Pasta" textureFile="Pixel_Mart\\white_cheese.png\\pencil_box.png"/>
-		<ingredient name="wine"  guiName="Vino" textureFile="Pixel_Mart\\white_cheese.png\\wine_red.png"/>
+		<ingredient name="pasta"  guiName="Pasta" textureFile="Pixel_Mart\\pencil_box.png"/>
+		<ingredient name="wine"  guiName="Vino" textureFile="Pixel_Mart\\wine_red.png"/>
 		<ingredient name="onion"  guiName="Luk" textureFile="farm assets\\Fruits and Vegetables\\Onion White.png"/>
 		<ingredient name="garlic"  guiName="Cesnjak" textureFile="farm assets\\Fruits and Vegetables\\Garlic.png"/>
 		<ingredient name="ham"  guiName="Sunka" textureFile="Pixel_Mart\\sausage_p.png"/>

@@ -1,5 +1,7 @@
 package systems;
 
+import java.util.Comparator;
+
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -7,11 +9,13 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Sort;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import components.AnimationComponent;
@@ -31,10 +35,24 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 	private SpriteBatch batch;
 	private OrthogonalTiledMapRenderer mapRenderer;
 	public Stage ui;
+	private Sort sorter;
+	private Comparator<Entity> spriteComparator;
 	
 	public RenderingSystem(SpriteBatch batch, int priority) {
 		super(priority);
 		this.batch = batch;
+		sorter = new Sort();
+		spriteComparator = new Comparator<Entity>() {
+
+			@Override
+			public int compare(Entity o1, Entity o2) {
+				if (spriteCompMapper.get(o1).position.y > spriteCompMapper.get(o2).position.y)
+					return -1;
+				
+				return 1;
+			}
+			
+		};
 		
 		ui = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), batch);
 		Gdx.input.setInputProcessor(ui);
@@ -69,7 +87,9 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 			}
 		}
 		
-		for (Entity e : engine.getEntitiesFor(spriteComponentsFamily)) {
+		Entity[] spriteEntities = getEngine().getEntitiesFor(spriteComponentsFamily).toArray(Entity.class);
+		sorter.sort(spriteEntities, spriteComparator);
+		for (Entity e : spriteEntities) {
 			SpriteComponent spriteComp = spriteCompMapper.get(e);
 			spriteComp.draw(batch);
 		}

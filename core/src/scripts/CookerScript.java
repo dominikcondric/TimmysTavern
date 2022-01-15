@@ -203,7 +203,7 @@ public class CookerScript extends Script {
 				recipeIngredientList.add(recipeNameLabel).expandX().fill();
 				recipeIngredientList.row();
 				mealImage.setDrawable(new TextureRegionDrawable(activeRecipe.texture));
-				recipeIngredientList.add(mealImage);
+				recipeIngredientList.add(mealImage).width(recipeIngredientList.getWidth() / 4.f).height(recipeIngredientList.getHeight() / 4.f);
 				self.getComponent(SoundComponent.class).getSoundEffect("mealComplete").shouldPlay = true;
 			}
 		}
