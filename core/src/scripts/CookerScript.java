@@ -210,6 +210,7 @@ public class CookerScript extends Script {
 		
 		if (cookingCounter < 0.f && Gdx.input.isKeyJustPressed(Keys.ENTER) && guiCompMapper.get(self).actors.isVisible()) {
 			scriptCompMapper.get(self).eventsToDispatch.add("PickItem");
+			self.getComponent(SoundComponent.class).getSoundEffect("mealTake").shouldPlay = true;
 		}
 	}
 	

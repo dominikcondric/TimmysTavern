@@ -105,6 +105,9 @@ public class NPCCustomerScript extends Script {
 				SpriteComponent spriteComp = self.getComponent(SpriteComponent.class); 
 				spriteComp.draw = false;
 			}
+		} else if (eventName == "TavernClosed") {
+			self.getComponent(ScriptComponent.class).eventsToDispatch.remove(eventName);
+			self.getComponent(DestroyEntityComponent.class).destroy = true;
 		}
 	}
 

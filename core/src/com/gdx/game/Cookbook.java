@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.XmlReader;
@@ -74,20 +75,35 @@ public class Cookbook implements Disposable {
 	private void loadRecipes(Element root, boolean local) {
 		for (int i = 0; i < root.getChildCount(); ++i) {
 			Element recipe = root.getChild(i);
+			if (!recipe.hasAttribute("name") || !recipe.hasAttribute("textureFile") || !recipe.hasAttribute("timeToCook"))
+				continue;
+			
 			String recipeName = recipe.getAttribute("name");
+			String textureFileName = recipe.getAttribute("textureFile");
 			int timeToCook = recipe.getIntAttribute("timeToCook");
 			Texture textureFile;
-			if (!local)
-				textureFile = new Texture(Gdx.files.internal(recipe.getAttribute("textureFile")));
-			else 
-				textureFile = new Texture(Gdx.files.local("CustomAssets\\" + recipe.getAttribute("textureFile")));
+			if (!local) {
+				textureFile = new Texture(Gdx.files.internal(textureFileName));
+			} else {
+				FileHandle textureFileHandle = Gdx.files.local("CustomAssets\\" + textureFileName);
+				if (!textureFileHandle.exists())
+					continue;
+				
+				textureFile = new Texture(textureFileHandle);
+			}
 				
 			Recipe r = new Recipe(recipeName, timeToCook, textureFile);
+			int successfulIngredientCount = 0;
 			for (int j = 0; j < recipe.getChildCount(); ++j) {
 				Element ingredient = recipe.getChild(j);
-				r.ingredients.add(new Ingredient(ingredientItemsList.get(ingredient.getAttribute("name")), ingredient.getIntAttribute("amount")));
+				if (ingredientItemsList.containsKey(ingredient.getAttribute("name"))) {
+					r.ingredients.add(new Ingredient(ingredientItemsList.get(ingredient.getAttribute("name")), ingredient.getIntAttribute("amount")));
+					successfulIngredientCount++;
+				}
 			}
-			cookbook.put(recipeName, r);
+			
+			if (successfulIngredientCount > 0)
+				cookbook.put(recipeName, r);
 		}
 	}
 	

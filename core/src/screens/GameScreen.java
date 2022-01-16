@@ -384,10 +384,23 @@ public class GameScreen implements Screen {
 			fixtureDef.filter.groupIndex = -EntityBits.STATIC_SCENERY_B2D_GROUP;
 			
 			body.createFixture(fixtureDef);
-			body.setActive(false);
 			polyShape.dispose();
 		}
 		
+		MapObject leverObject = mapComp.map.getLayers().get("LeverLayer").getObjects().get("OpenLever");
+		Rectangle leverRect = ((RectangleMapObject)leverObject).getRectangle();
+		leverRect.set(leverRect.getX() * mapScalingFactor, leverRect.getY() * mapScalingFactor, leverRect.getWidth() * mapScalingFactor, leverRect.getHeight() * mapScalingFactor);
+		polyShape = new PolygonShape();
+		polyShape.setAsBox(leverRect.getWidth() / 2f, leverRect.getHeight() / 2f, leverRect.getCenter(new Vector2()).sub(body.getPosition()), 0.f);
+		fixtureDef = new FixtureDef();
+		fixtureDef.shape = polyShape;
+		fixtureDef.isSensor = true;
+		fixtureDef.filter.categoryBits = EntityBits.INTERACTABLE_B2D_BIT;
+		fixtureDef.filter.maskBits = EntityBits.PLAYER_B2D_BIT;
+		fixtureDef.filter.groupIndex = -EntityBits.STATIC_SCENERY_B2D_GROUP;
+		body.createFixture(fixtureDef).setUserData(tavernScriptComp.script);
+		
+		body.setActive(false);
 		mapEntity.add(new PhysicsComponent(body));
 		tavernEntities.add(mapEntity);
 		
